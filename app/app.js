@@ -1,11 +1,10 @@
-const { token, botname, ver } = require('./config.json'); // 設定ファイル読み込み
+const { token, botName, ver } = require('./config.json'); // 設定ファイル読み込み
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, GatewayIntentBits, Collection } = require("discord.js");
+const { Client, GatewayIntentBits, Collection, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const client = new Client({
     intents: Object.values(GatewayIntentBits).reduce((a, b) => a | b)
 });
-const discordbtn = require('discord.js-buttons')(client);
 
 // ========================================================
 // [Add] スラッシュコマンド読み込み
@@ -28,7 +27,7 @@ for (const file of commandFiles) {
 
 // ========================================================
 
-console.log(botname + " " + ver + " を起動します");
+console.log(botName + " " + ver + " を起動します");
 
 client.once("ready", async () => {
     client.user.setPresence({ activities: [{ name: "Ver " + ver }] });
@@ -54,16 +53,8 @@ client.on('interactionCreate', async interaction => {
 });
 
 
-client.on("messageCreate", async (msg) => {
-    if (msg.author.bot) { // bot同士の会話回避
-        return;
-    }
-
-    if (msg.content == "!msgTest") {
-        console.log(msg.author.id + " が !msgTest を実行しました");
-        const user = client.users.cache.get(msg.author.id);
-        user.send("DM送信テスト")
-    }
+client.on('clickButton', async (button) => {
+    console.log(button);
 });
 
 client.login(token);

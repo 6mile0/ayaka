@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "discord.js": "^14.7.1",
-    "discord.js-buttons": "^1.0.0",
     "nedb": "^1.8.0"
   }
 }
