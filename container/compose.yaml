@@ -1,0 +1,17 @@
+version: "3"
+services:
+  code-server:
+    build: .
+    container_name: main
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Tokyo
+      - PASSWORD=password
+      - SUDO_PASSWORD=password
+      - DEFAULT_WORKSPACE=/config/workspace
+    volumes:
+      - /home/kakeru/config:/config
+    ports:
+      - 8443:8443
+    restart: unless-stopped
