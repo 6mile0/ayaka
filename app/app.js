@@ -10,7 +10,6 @@ const client = new Client({
 });
 
 client.commands = new Collection();
-
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 for (const file of commandFiles) {
@@ -23,8 +22,7 @@ for (const file of commandFiles) {
     }
 }
 
-console.log(globalCfg.botname + " " + globalCfg.ver + " を起動します");
-
+console.log(`${globalCfg.botName} ${globalCfg.ver} を起動します...`);
 client.once("ready", async () => {
     client.user.setPresence({ activities: [{ name: "Ver " + globalCfg.ver }] });
     console.log("準備完了");
