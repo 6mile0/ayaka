@@ -19,6 +19,7 @@ const asighnPorts = async (userid) => {
             if (err) {
                 reject(err);
             } else {
+                console.log(docs);
                 if (docs.length == 0) {
                     resolve(60000);
                 } else {

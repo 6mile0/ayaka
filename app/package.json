@@ -3,11 +3,16 @@
   "name": "ayaka",
   "version": "1.0.0",
   "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
   "author": "6mile0",
   "license": "MIT",
   "dependencies": {
     "discord.js": "^14.7.1",
     "nanoid": "^4.0.0",
-    "nedb": "^1.8.0"
+    "nedb": "^1.8.0",
+    "nodemon": "^2.0.20"
   }
 }
