@@ -1,23 +1,23 @@
-const { REST, Routes } = require('discord.js');
-const { clientId, guildId, token } = require('./config.json');
-const fs = require('node:fs');
+import { REST, Routes } from 'discord.js';
+import cfg from './config.json' assert { type: 'json' };
+import fs from 'node:fs';
 
 const commands = [];
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
 for (const file of commandFiles) {
-    const command = require(`./commands/${file}`);
-    commands.push(command.data.toJSON());
+    const command = await import(`./commands/${file}`);
+    commands.push(command.default.data.toJSON());
 }
 
-const rest = new REST({ version: '10' }).setToken(token);
+const rest = new REST({ version: '10' }).setToken(cfg.token);
 
 (async () => {
     try {
         console.log(`${commands.length} 個のアプリケーションコマンドを登録します。`);
 
         const data = await rest.put(
-            Routes.applicationGuildCommands(clientId, guildId),
+            Routes.applicationGuildCommands(cfg.clientId, cfg.guildId),
             { body: commands },
         );
 

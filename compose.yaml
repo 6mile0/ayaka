@@ -1,12 +1,33 @@
-# docker-compose.yaml
 version: "3.9"
 services:
-  nginx:
-    image: nginx:stable
-    container_name: nginx
-    ports:
-      - 8080:80
+  ayaka:
+    image: node:latest
     volumes:
-      - ./config/nginx:/etc/nginx/conf.d
-      - ./data/nginx:/var/log/nginx
-      - ./nginx:/var/www/html
+      - ./app:/app
+    working_dir: /app
+    command: bash -c "yarn install && yarn run dev"
+    networks:
+      - br0
+    depends_on:
+      - db
+  db:
+    image: mariadb:latest
+    restart: always
+    ports:
+      - 3307:3306
+    volumes:
+      - "./db/data:/var/lib/mysql"
+      - "./db/data/init.d:/docker-entrypoint-initdb.d"
+    networks:
+      - br0
+    environment:
+      - MYSQL_ROOT_PASSWORD=kidahirokazu
+      - MYSQL_DATABASE=ayaka
+      - MYSQL_USER=ayaka
+      - MYSQL_PASSWORD=ayaka
+volumes:
+  db_data:
+
+networks:
+  br0:
+    driver: bridge
