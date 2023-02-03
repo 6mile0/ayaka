@@ -1,7 +1,6 @@
-const { token, botName, ver } = require('./config.json'); // 設定ファイル読み込み
-const fs = require('node:fs');
-const path = require('node:path');
-const { Client, GatewayIntentBits, Collection, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+import globalCfg from "./config.json" assert { type: "json" }; // 設定ファイル読み込み
+import ayaka from './commands/ayaka.js';
+import { Client, GatewayIntentBits, Collection } from 'discord.js';
 const client = new Client({
     intents: Object.values(GatewayIntentBits).reduce((a, b) => a | b)
 });
@@ -11,26 +10,14 @@ const client = new Client({
 // 2022/12/31
 // ========================================================
 client.commands = new Collection();
-
-const commandsPath = path.join(__dirname, 'commands');
-const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-
-for (const file of commandFiles) {
-    const filePath = path.join(commandsPath, file);
-    const command = require(filePath);
-    if ('data' in command && 'execute' in command) {
-        client.commands.set(command.data.name, command);
-    } else {
-        console.log(`${filePath} に必要な "data" か "execute" がありません。`);
-    }
-}
+client.commands.set(ayaka.data.name, ayaka);
 
 // ========================================================
 
-console.log(botName + " " + ver + " を起動します");
+console.log(globalCfg.botname + " " + globalCfg.ver + " を起動します");
 
 client.once("ready", async () => {
-    client.user.setPresence({ activities: [{ name: "Ver " + ver }] });
+    client.user.setPresence({ activities: [{ name: "Ver " + globalCfg.ver }] });
     console.log("準備完了");
 });
 
@@ -57,4 +44,4 @@ client.on('clickButton', async (button) => {
     console.log(button);
 });
 
-client.login(token);
+client.login(globalCfg.token);
