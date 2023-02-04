@@ -1,96 +1,104 @@
 import globalCfg from "../config.json" assert { type: "json" };
+import dbCfg from "../dbCredentials.json" assert { type: "json" };
 import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { nanoid } from 'nanoid';
+import { execSync } from 'node:child_process';
+import { nanoid, customAlphabet } from 'nanoid';
 import fs from 'node:fs';
-import { exec, execSync } from 'node:child_process';
-import Datastore from 'nedb';
-var db = new Datastore({
-    filename: '../db/data.db',
-    autoload: true
-});
+import mysql from 'mysql2';
+const coustomNanoid = customAlphabet('1234567890abcdef', 8);
 
-function padZero(time) {
-    return time.toString().padStart(2, "0")
-}
-
-const asighnPorts = async (userid) => {
+async function asighnPorts() { // 利用可能ポートを割り当てる関数
     return new Promise((resolve, reject) => {
-        db.find({ userId: userid }, (err, docs) => {
-            if (err) {
-                reject(err);
-            } else {
-                console.log(docs);
-                if (docs.length == 0) {
-                    resolve(60000);
-                } else {
-                    resolve(docs[docs.length - 1].port + 1);
+        try {
+            let db = mysql.createConnection(dbCfg); // データベースに接続
+            db.execute(
+                "SELECT COUNT(*) AS count FROM users",
+                function (err, res) {
+                    if (err) {
+                        console.log(err);
+                        reject(err);
+                    }
+                    console.log(res[0].count);
+                    resolve(60000 + res[0].count);
                 }
-            }
-        });
+            );
+        } catch (err) {
+            console.log(err);
+            reject(err);
+        }
     });
 }
 
-const startUpAyaka = async (cfg) => {
+async function startUpAyaka(cfg, interaction) {
     return new Promise((resolve, reject) => {
         try {
             if (!fs.existsSync(`${globalCfg.mntPoint}/${cfg.userId}/config`)) {
                 fs.mkdirSync(`${globalCfg.mntPoint}/${cfg.userId}/config`, { recursive: true }); // ユーザーフォルダを作成
+                console.log("ユーザーフォルダを作成しました");
             }
         } catch (err) {
             reject(err);
         }
 
-        exec(`docker run -d --name=${cfg.ctnId} -e PUID=${globalCfg.puId} -e PGID=${globalCfg.pgId} -e TZ=Asia/Tokyo -e PASSWORD=${cfg.pass} -e SUDO_PASSWORD=${cfg.sudoPass} -e DEFAULT_WORKSPACE=/config/workspace -p ${cfg.port}:8443 -v ${globalCfg.mntPoint}/${cfg.userId}/config:/config --restart unless-stopped ayaka/allpkg`, { timeout: 10000 },
-            function (error, stdout, stderr) {
-                // シェル上でコマンドを実行できなかった場合のエラー処理
-                if (error !== null) {
-                    if (!stderr) {
-                        reject(error);
-                    } else {
-                        reject(stderr);
-                    }
-                }
+        try {
+            var res = execSync(`docker run -d --name=${cfg.ctnId} -e PUID=${globalCfg.puId} -e PGID=${globalCfg.pgId} -e TZ=Asia/Tokyo -e PASSWORD=${cfg.pass} -e SUDO_PASSWORD=${cfg.sudoPass} -e DEFAULT_WORKSPACE=/config/workspace -p ${cfg.port}:8443 -v ${globalCfg.mntPoint}/${cfg.userId}/config:/config --restart unless-stopped ayaka/allpkg`);
+            if (res.toString().trim() == "") {
+                reject("コンテナの起動に失敗しました");
+            } else {
+                console.log("コンテナを起動しました");
+            }
 
-                try {
-                    var existCheck = execSync(`docker ps -a -f 'name=${cfg.ctnId}' --format "{{.Names}}"`);
-                    if (existCheck.toString().trim() == "") { // コンテナIDが一致しなかった場合 => コンテナが起動していない
-                        reject("コンテナが起動していません");
-                    }
-                } catch {
-                    reject("コンテナが起動していません");
-                };
+            try {
+                var nowIimeMs = Math.round(new Date().getTime() / 1000); // 現在時刻(ミリ秒)
+                var createdTime = new Date(nowIimeMs * 1000); // 生成時間
+                var expiredTime = new Date((nowIimeMs + (3600 * 3)) * 1000); // 3時間後(自動削除予定時刻)
 
-                if (stdout.toString()) { // コンテナIDが一致した場合
-                    db.insert({
-                        ctnId: cfg.ctnId, // コンテナID
-                        userId: cfg.userId, // ユーザーID
-                        containerName: cfg.containerName, // コンテナ名
-                        password: cfg.pass, // パスワード
-                        sudoPassword: cfg.sudoPass, // sudoパスワード
-                        port: cfg.port, // 利用可能ポート
-                        startTime: new Date(), // 生成時間
-                        endTime: new Date().getTime() + 10800000, // 自動削除時間
-                    }, (err, newDoc) => {
+                var intervalID = setInterval(() => {
+                    if (nowIimeMs >= (nowIimeMs + 10800000)) { // 3時間後ミリ秒一致時
+                        const timerEmbed = new EmbedBuilder()
+                            .setColor("#ED4245")
+                            .setTitle('コンテナを停止しました')
+                            .setDescription("3時間経過し、延長申請がなかったためコンテナを停止しました。\nご利用ありがとうございました。")
+                            .addFields(
+                                { name: 'コンテナ名', value: cfg.containerName },
+                                { name: '作成者', value: interaction.user.username },
+                                { name: '作成日時', value: createdTime.toLocaleString('ja-JP') },
+                            )
+                            .setTimestamp()
+                        interaction.channel.send({ embeds: [timerEmbed] });
+                        setTimeout(() => {
+                            clearInterval(intervalID);
+                        });
+                    }
+                }, 1000);
+
+                let db = mysql.createConnection(dbCfg); // データベースに接続
+                db.execute(
+                    `INSERT INTO users VALUES ("${cfg.userId}","${cfg.ctnId}","${cfg.containerName}","${cfg.pass}","${cfg.sudoPass}",${cfg.port},${nowIimeMs},${nowIimeMs + 10800000},${intervalID},0)`,
+                    function (err, res) {
                         if (err) {
+                            console.log(err);
                             reject(err);
-                        } else {
-                            resolve([
-                                `https://ayaka.cybroad.dev/attach/${newDoc.ctnId}`,
-                                newDoc.containerName,
-                                newDoc.password,
-                                newDoc.sudoPassword,
-                                `${padZero(newDoc.startTime.getFullYear())}/${padZero(newDoc.startTime.getMonth() + 1)}/${padZero(newDoc.startTime.getDate())} ${padZero(newDoc.startTime.getHours())}:${padZero(newDoc.startTime.getMinutes())}:${padZero(newDoc.startTime.getSeconds())}`, // 生成時間
-                                `${padZero(newDoc.startTime.getFullYear())}/${padZero(newDoc.startTime.getMonth() + 1)}/${padZero(newDoc.startTime.getDate())} ${padZero(newDoc.startTime.getHours() + 3)}:${padZero(newDoc.startTime.getMinutes())}:${padZero(newDoc.startTime.getSeconds())}`, // 3時間後
-                                newDoc.port,
-                                "mira"
-                            ]);
                         }
-                    });
-
-                } else {
-                    reject("コンテナの生成に失敗しました。");
-                }
-            });
+                        resolve([
+                            `${globalCfg.serviceDomain}/attach/${cfg.ctnId}`, // アクセスURL
+                            cfg.containerName, // コンテナ名
+                            cfg.pass, // パスワード
+                            cfg.sudoPass, // sudoパスワード
+                            createdTime.toLocaleString('ja-JP'), // 生成時間
+                            expiredTime.toLocaleString('ja-JP'), // 削除予定時刻
+                            cfg.port, // ポート
+                            "mira" // 収容サーバ
+                        ]);
+                    }
+                );
+            } catch (err) {
+                console.log(err);
+                reject(err);
+            }
+        } catch (err) {
+            reject(err);
+        }
     });
 }
 
@@ -99,18 +107,18 @@ export default {
         .setName('ayaka')
         .setDescription('コンテナ型独立開発環境を立ち上げることができます。3hで自動停止しますが、延長をすることが可能です。'),
     async execute(interaction) {
-        console.log(interaction.user.id + " がコマンドを実行しました");
-        const ports = await asighnPorts(interaction.user.id); // 利用可能ポートを取得
+        console.log(interaction.user);
+        const ports = await asighnPorts(); // 利用可能ポートを取得
         const containerInfo = {
             "ctnId": nanoid(16), // コンテナID
             "userId": interaction.user.id, // ユーザーID
-            "containerName": "ayaka-" + nanoid(16), // コンテナ名
+            "containerName": "ayaka-" + coustomNanoid(), // コンテナ名
             "pass": nanoid(20), // パスワード
             "sudoPass": nanoid(32), // sudoパスワード
             "port": ports, // 利用可能ポート
         };
 
-        await startUpAyaka(containerInfo).then((res) => {
+        await startUpAyaka(containerInfo, interaction).then((res) => {
             console.log(res);
             const message = new EmbedBuilder()
                 .setColor(0x32cd32)
@@ -126,7 +134,7 @@ export default {
                     { name: '利用可能ポート', value: String(res[6]) },
                     { name: '収容サーバ', value: res[7] },
                 )
-                .setFooter({ text: `ayaka Ver ${globalCfg.ver}`, iconURL: globalCfg.icon });
+                .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
 
             const controlBtn = new ActionRowBuilder()
                 .addComponents(
@@ -156,7 +164,7 @@ export default {
                 .setColor(0xFF0000)
                 .setTitle('エラーが発生しました')
                 .setDescription("[E1001] コンテナの起動に失敗しました。")
-                .setFooter({ text: `ayaka Ver ${globalCfg.ver}`, iconURL: globalCfg.icon });
+                .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
             interaction.reply({ ephemeral: true, embeds: [message] });
         });
     },
