@@ -7,6 +7,29 @@ import fs from 'node:fs';
 import mysql from 'mysql2';
 const coustomNanoid = customAlphabet('1234567890abcdef', 8);
 
+
+async function removeProxy(cfg) { // 利用可能ポートを削除する関数
+    return new Promise((resolve, reject) => {
+        try {
+            fs.writeFileSync(`sh /etc/nginx/conf.d/remove.sh ${cfg.ctnId}`); // ポートを追加
+            resolve("ポートを割り当てました");
+        } catch {
+            reject("ポートの割り当てに失敗しました");
+        }
+    });
+};
+
+async function addProxy(cfg) { // 利用可能ポートを割り当てる関数
+    return new Promise((resolve, reject) => {
+        try {
+            fs.writeFileSync(`sh /etc/nginx/conf.d/add.sh ${cfg.ctnId} ${cfg.ports}`); // ポートを追加
+            resolve("ポートを割り当てました");
+        } catch {
+            reject("ポートの割り当てに失敗しました");
+        }
+    });
+};
+
 async function asighnPorts() { // 利用可能ポートを割り当てる関数
     return new Promise((resolve, reject) => {
         try {
@@ -81,7 +104,7 @@ async function startUpAyaka(cfg, interaction) {
                             reject(err);
                         }
                         resolve([
-                            `${globalCfg.serviceDomain}/attach/${cfg.ctnId}`, // アクセスURL
+                            `${globalCfg.serviceDomain}/attach/${cfg.ctnId}/login`, // アクセスURL
                             cfg.containerName, // コンテナ名
                             cfg.pass, // パスワード
                             cfg.sudoPass, // sudoパスワード
@@ -118,6 +141,7 @@ export default {
             "port": ports, // 利用可能ポート
         };
 
+        await addProxy(containerInfo); // プロキシを追加
         await startUpAyaka(containerInfo, interaction).then((res) => {
             console.log(res);
             const message = new EmbedBuilder()
