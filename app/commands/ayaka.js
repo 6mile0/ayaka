@@ -104,7 +104,7 @@ async function startUpAyaka(cfg, interaction) {
                             reject(err);
                         }
                         resolve([
-                            `${globalCfg.serviceDomain}/attach/${cfg.ctnId}/login`, // アクセスURL
+                            `${globalCfg.serviceDomain}attach/${cfg.ctnId}/login`, // アクセスURL
                             cfg.containerName, // コンテナ名
                             cfg.pass, // パスワード
                             cfg.sudoPass, // sudoパスワード

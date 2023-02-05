@@ -1,4 +1,5 @@
 import globalCfg from "./config.json" assert { type: "json" }; // 設定ファイル読み込み
+import dbCfg from "./dbCredentials.json" assert { type: "json" };
 import { Client, GatewayIntentBits, Collection } from 'discord.js';
 import fs from 'node:fs';
 import path from 'path';
