@@ -80,11 +80,11 @@ async function startUpAyaka(cfg, interaction) {
                 var expiredTime = new Date((nowIimeMs + (3600 * 3)) * 1000); // 3時間後(自動削除予定時刻)
 
                 var intervalID = setInterval(() => {
-                    if (nowIimeMs >= (nowIimeMs + 10800000)) { // 3時間後ミリ秒一致時
+                    if (nowIimeMs >= expiredTime) { // 3時間後ミリ秒一致時
                         const timerEmbed = new EmbedBuilder()
                             .setColor("#ED4245")
-                            .setTitle('コンテナを停止しました')
-                            .setDescription("3時間経過し、延長申請がなかったためコンテナを停止しました。\nご利用ありがとうございました。")
+                            .setTitle('あなたのコンテナは停止されました')
+                            .setDescription("3時間経過し、延長申請がなかったためコンテナを削除しました。\nご利用ありがとうございました。")
                             .addFields(
                                 { name: 'コンテナ名', value: cfg.containerName },
                                 { name: '作成者', value: interaction.user.username },
@@ -131,7 +131,7 @@ async function startUpAyaka(cfg, interaction) {
 
 export default {
     data: new SlashCommandBuilder()
-        .setName('ayaka')
+        .setName('create')
         .setDescription('コンテナ型独立開発環境を立ち上げることができます。3hで自動停止しますが、延長をすることが可能です。'),
     async execute(interaction) {
         console.log(interaction.user);
