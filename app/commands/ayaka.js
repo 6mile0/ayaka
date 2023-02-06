@@ -176,13 +176,15 @@ export default {
                     new ButtonBuilder()
                         .setCustomId('extend')
                         .setLabel("利用期間を延長する(3h)")
-                        .setStyle(ButtonStyle.Success),
+                        .setStyle(ButtonStyle.Success)
+                        .setDisabled(true),
                 )
                 .addComponents(
                     new ButtonBuilder()
                         .setCustomId('export')
                         .setLabel("データをエクスポートする")
-                        .setStyle(ButtonStyle.Primary),
+                        .setStyle(ButtonStyle.Primary)
+                        .setDisabled(true),
                 )
             interaction.reply({
                 ephemeral: true, embeds: [message], components: [controlBtn]
