@@ -7,18 +7,6 @@ import fs from 'node:fs';
 import mysql from 'mysql2';
 const coustomNanoid = customAlphabet('1234567890abcdef', 8);
 
-
-// async function removeProxy(cfg) { // 利用可能ポートを削除する関数
-//     return new Promise((resolve, reject) => {
-//         try {
-//             fs.writeFileSync(`sh /etc/nginx/conf.d/remove.sh ${cfg.ctnId}`); // ポートを追加
-//             resolve("ポートを割り当てました");
-//         } catch {
-//             reject("ポートの割り当てに失敗しました");
-//         }
-//     });
-// };
-
 async function addProxy(cfg) { // 利用可能ポートを割り当てる関数
     return new Promise((resolve, reject) => {
         try {
@@ -39,6 +27,16 @@ async function asighnPorts() { // 利用可能ポートを割り当てる関数
     return new Promise((resolve, reject) => {
         try {
             let db = mysql.createConnection(dbCfg); // データベースに接続
+            db.execute(
+                "SELECT * FROM users",
+                function (err, res) {
+                    if (err) {
+                        console.log(err);
+                        reject(err);
+                    }
+                    console.log(res);
+                }
+            );
             db.execute(
                 "SELECT COUNT(*) AS count FROM users",
                 function (err, res) {
@@ -109,7 +107,7 @@ async function startUpAyaka(cfg, interaction) {
                             reject(err);
                         }
                         resolve([
-                            `${globalCfg.serviceDomain}attach/${cfg.ctnId}/login`, // アクセスURL
+                            `${globalCfg.serviceDomain}/${cfg.ctnId}/login`, // アクセスURL
                             cfg.containerName, // コンテナ名
                             cfg.pass, // パスワード
                             cfg.sudoPass, // sudoパスワード
@@ -120,6 +118,7 @@ async function startUpAyaka(cfg, interaction) {
                         ]);
                     }
                 );
+                db.end();
             } catch (err) {
                 console.log(err);
                 reject(err);

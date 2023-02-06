@@ -1,6 +1,6 @@
 create table ayaka.users(
-    user_id varchar(20) not null primary key,
-    container_id char(16) not null,
+    user_id varchar(20) not null,
+    container_id char(16) not null primary key,
     container_name text not null,
     editor_password char(20) not null,
     sudo_password char(32) not null,
