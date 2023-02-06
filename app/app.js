@@ -1,6 +1,6 @@
 import globalCfg from "./config.json" assert { type: "json" }; // 設定ファイル読み込み
 import dbCfg from "./dbCredentials.json" assert { type: "json" };
-import { Client, GatewayIntentBits, Collection } from 'discord.js';
+import { Client, GatewayIntentBits, Collection, EmbedBuilder } from 'discord.js';
 import fs from 'node:fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -39,8 +39,14 @@ client.on('interactionCreate', async interaction => {
         try {
             await command.execute(interaction);
         } catch (error) {
+            // 想定外の例外をキャッチ
             console.error(error);
-            await interaction.reply({ content: 'エラーが発生しました。', ephemeral: true });
+            const message = new EmbedBuilder()
+                .setColor(0xFF0000)
+                .setTitle('エラーが発生しました')
+                .setDescription("[E1001] コンテナの起動に失敗しました。")
+                .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
+            interaction.reply({ ephemeral: true, embeds: [message] });
             return;
         }
     } else { // コマンド以外のインタラクション

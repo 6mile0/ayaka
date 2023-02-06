@@ -8,24 +8,29 @@ import mysql from 'mysql2';
 const coustomNanoid = customAlphabet('1234567890abcdef', 8);
 
 
-async function removeProxy(cfg) { // 利用可能ポートを削除する関数
-    return new Promise((resolve, reject) => {
-        try {
-            fs.writeFileSync(`sh /etc/nginx/conf.d/remove.sh ${cfg.ctnId}`); // ポートを追加
-            resolve("ポートを割り当てました");
-        } catch {
-            reject("ポートの割り当てに失敗しました");
-        }
-    });
-};
+// async function removeProxy(cfg) { // 利用可能ポートを削除する関数
+//     return new Promise((resolve, reject) => {
+//         try {
+//             fs.writeFileSync(`sh /etc/nginx/conf.d/remove.sh ${cfg.ctnId}`); // ポートを追加
+//             resolve("ポートを割り当てました");
+//         } catch {
+//             reject("ポートの割り当てに失敗しました");
+//         }
+//     });
+// };
 
 async function addProxy(cfg) { // 利用可能ポートを割り当てる関数
     return new Promise((resolve, reject) => {
         try {
-            fs.writeFileSync(`sh /etc/nginx/conf.d/add.sh ${cfg.ctnId} ${cfg.ports}`); // ポートを追加
-            resolve("ポートを割り当てました");
+            var res = execSync(`docker exec ayaka-nginx-1 sh /etc/nginx/conf.d/add.sh ${cfg.ctnId} ${cfg.port}`); // ポートを追加
+            if (res.toString().trim() == "Reloading nginx: nginx.") {
+                resolve(`${cfg.ctnId}の外部接続設定(${cfg.port}番)を追加しました`);
+            } else {
+                console.log(res.toString());
+                reject(`${cfg.ctnId}の外部接続設定に失敗しました`);
+            }
         } catch {
-            reject("ポートの割り当てに失敗しました");
+            reject(`${cfg.ctnId}の外部接続設定に失敗しました`);
         }
     });
 };
