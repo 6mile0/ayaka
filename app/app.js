@@ -1,9 +1,10 @@
 import globalCfg from "./config.json" assert { type: "json" }; // 設定ファイル読み込み
-import dbCfg from "./dbCredentials.json" assert { type: "json" };
 import { Client, GatewayIntentBits, Collection, EmbedBuilder } from 'discord.js';
+import { getCtnId, shitDownAyaka, delRecord } from './functions/delete.js';
 import fs from 'node:fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const client = new Client({
@@ -22,6 +23,7 @@ for (const file of commandFiles) {
         console.log(`${filePath} に必要な "data" か "execute" がありません。`);
     }
 }
+
 
 console.log(`${globalCfg.botName} ${globalCfg.ver} を起動します...`);
 client.once("ready", async () => {
@@ -52,9 +54,46 @@ client.on('interactionCreate', async interaction => {
     } else { // コマンド以外のインタラクション
         console.log(interaction.customId);
         if (interaction.customId === "stop") {
-            await interaction.reply({
-                content: "停止ボタンが押されました。",
-                ephemeral: true
+            await getCtnId(interaction.user.id).then((ctnInfo) => { // コンテナID・コンテナ名を取得
+                console.log(ctnInfo[0]);
+                // Promise.all([shitDownAyaka(ctnInfo[0]), delRecord(ctnInfo[0])]).then((res) => {
+                //     console.log(res);
+                //     if (res[0] == ctnInfo[0]) {
+                //         const message = new EmbedBuilder()
+                //             .setColor(0X32CD32)
+                //             .setTitle('ご利用ありがとうございました')
+                //             .setDescription("下記のコンテナを削除しました。")
+                //             .addFields(
+                //                 { name: 'コンテナ名', value: ctnInfo[1] },
+                //                 { name: 'コンテナID', value: ctnInfo[0] },
+                //             )
+                //             .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
+                //         interaction.reply({ embeds: [message] });
+                //     } else {
+                //         const message = new EmbedBuilder()
+                //             .setColor(0xFF0000)
+                //             .setTitle('エラーが発生しました')
+                //             .setDescription("[E1001] コンテナの削除に失敗しました。")
+                //             .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
+                //         interaction.reply({ embeds: [message] });
+                //     }
+                // }).catch((err) => {
+                //     console.log(err);
+                //     const message = new EmbedBuilder()
+                //         .setColor(0xFF0000)
+                //         .setTitle('エラーが発生しました')
+                //         .setDescription("[E1001] コンテナの削除に失敗しました。")
+                //         .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
+                //     interaction.reply({ embeds: [message] });
+                // });
+            }).catch((err) => {
+                console.log(err);
+                const message = new EmbedBuilder()
+                    .setColor(0xFF0000)
+                    .setTitle('エラーが発生しました')
+                    .setDescription("削除するコンテナが見つかりませんでした。")
+                    .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
+                interaction.reply({ embeds: [message] });
             });
         } else if (interaction.customId === "extend") {
             await interaction.reply({
