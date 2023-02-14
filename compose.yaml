@@ -2,6 +2,8 @@ version: "3.9"
 services:
   bot:
     build: ./dockerfiles/bot
+    ports:
+      - 8080:3000
     volumes:
       - ./app:/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -36,7 +38,7 @@ services:
     build: ./dockerfiles/nginx
     restart: always
     ports:
-      - 8080:80
+      - 80:80
     networks:
       - br0
     depends_on:
