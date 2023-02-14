@@ -1,6 +1,13 @@
-import dbCfg from "../dbCredentials.json" assert { type: "json" };
+import dotenv from 'dotenv';
+const globalCfg = dotenv.config().parsed; // 設定ファイル読み込み
 import { execSync } from 'node:child_process';
 import mysql from 'mysql2';
+const dbCfg = {
+    host: globalCfg.DB_HOST,
+    user: globalCfg.DB_USER,
+    password: globalCfg.DB_PASS,
+    database: globalCfg.DB_NAME,
+}
 
 // =====================================================================
 // コンテナID取得関数
