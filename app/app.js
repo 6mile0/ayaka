@@ -1,7 +1,7 @@
 import globalCfg from "./config.json" assert { type: "json" }; // 設定ファイル読み込み
 import { Client, GatewayIntentBits, Collection, EmbedBuilder } from 'discord.js';
-import { getCtnId, shitDownAyaka, delRecord } from './functions/containerDelete.js';
-import { extendTime } from './functions/containerManager.js';
+import { getCtnId, delRecord } from './functions/containerDelete.js';
+import { extendTime, buttonKillAyaka} from './functions/containerManager.js';
 import fs from 'node:fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -68,7 +68,7 @@ client.on('interactionCreate', async interaction => {
         if (interaction.customId === "stop") {
             await getCtnId(userId).then((ctnInfo) => { // コンテナID・コンテナ名を取得
                 console.log(ctnInfo[0]);
-                Promise.all([shitDownAyaka(ctnInfo[0]), delRecord(ctnInfo[0])]).then((res) => {
+                Promise.all([buttonKillAyaka(ctnInfo[0]), delRecord(ctnInfo[0])]).then((res) => {
                     console.log(res[0]);
                     if (res[0] == ctnInfo[0]) {
                         const message = new EmbedBuilder()

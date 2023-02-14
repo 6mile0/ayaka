@@ -1,6 +1,7 @@
 import globalCfg from "../config.json" assert { type: "json" };
 import dbCfg from "../dbCredentials.json" assert { type: "json" };
-import { shitDownAyaka, delRecord } from './containerDelete.js';
+import { EmbedBuilder } from 'discord.js';
+import { timerKillAyaka, delRecord } from './containerDelete.js';
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import mysql from 'mysql2';
@@ -99,20 +100,19 @@ export async function startUpAyaka(cfg, interaction) {
                     if (dt.getTime() >= cfg.expiredMs) { // 3時間後ミリ秒一致時
                         const timerEmbed = new EmbedBuilder()
                             .setColor("#ED4245")
-                            .setTitle('あなたのコンテナは停止されました')
+                            .setTitle(`${interaction.user.username}さんのコンテナは停止されました`)
                             .setDescription("3時間経過し、延長申請がなかったためコンテナを削除しました。\nご利用ありがとうございました。")
                             .addFields(
                                 { name: 'コンテナ名', value: cfg.containerName },
-                                { name: '作成者', value: interaction.user.username },
                                 { name: '作成日時', value: cfg.createdTime.toLocaleString('ja-JP') },
                             )
                             .setTimestamp()
                         interaction.channel.send({ embeds: [timerEmbed] });
 
                         setTimeout(() => { // 3時間後にコンテナを削除
-                            Promise.all([shitDownAyaka(cfg.ctnId), delRecord(cfg.ctnId)]).then((res) => {
+                            Promise.all([timerKillAyaka(cfg.ctnId), delRecord(cfg.ctnId)]).then((res) => {
                                 console.log(res);
-                                if (res[0] == ctnId) {
+                                if (res[0] == cfg.ctnId) {
                                     const message = new EmbedBuilder()
                                         .setColor(0X32CD32)
                                         .setTitle('ご利用ありがとうございました')
@@ -121,7 +121,7 @@ export async function startUpAyaka(cfg, interaction) {
                                             { name: 'コンテナ名', value: res[0] },
                                         )
                                         .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
-                                    interaction.reply({ ephemeral: true, embeds: [message] });
+                                    interaction.user.send({ ephemeral: true, embeds: [message] });
                                 } else {
                                     const message = new EmbedBuilder()
                                         .setColor(0xFF0000)

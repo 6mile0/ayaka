@@ -1,6 +1,6 @@
 import dbCfg from "../dbCredentials.json" assert { type: "json" };
 import mysql from 'mysql2';
-
+import { EmbedBuilder } from 'discord.js';
 export async function extendTime(ctnId) {
     return new Promise(async (resolve, reject) => {
         let db = mysql.createConnection(dbCfg); // データベースに接続
@@ -88,5 +88,20 @@ export async function extendTime(ctnId) {
             console.log(err);
             reject(err);
         }
+    });
+}
+export async function buttonKillAyaka(ctnId) {
+    return new Promise((resolve, reject) => {
+                try {
+                    var result = execSync(`docker kill $(docker ps -a -q -f name=${ctnId})`);
+                    console.log(result.toString().trim());
+                    if (result.toString().trim() == "") {
+                        reject("削除失敗"); // コンテナ削除失敗
+                    } else {
+                        resolve(ctnId); // コンテナ削除成功
+                    }
+                } catch (e) {
+                    reject([e]); // 例外1
+                }
     });
 }
