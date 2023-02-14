@@ -14,8 +14,8 @@ export default {
         console.log(interaction.user);
         const message = new EmbedBuilder()
             .setColor(0xFF0000)
-            .setTitle('テスト')
-            .setDescription("テスト")
+            .setTitle('コンテナリストはこちら')
+            .setDescription("http://localhost:8080/lists")
             .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
         interaction.reply({ embeds: [message] });
     },

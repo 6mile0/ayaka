@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>ContainerList</title>
+</head>
+
+<body>
+<h1>稼働コンテナ一覧</h1>
+<table class="table">
+<thead>
+    <tr>
+        <th>作成者</th>
+        <th>コンテナ名</th>
+        <th>ポート番号</th>
+        <th>開始時間</th>
+        <th>終了時間</th>
+    </tr>
+    </thead>
+    <tbody>
+    <% for (let i = 0; i < container_list.length; i++) { %>
+    <tr>
+        <td><%= container_list[i][0]%></td>
+        <td><%= container_list[i][1]%></td>
+        <td><%= container_list[i][2]%></td>
+        <td><%= container_list[i][3]%></td>
+        <td><%= container_list[i][4]%></td>
+    </tr>
+    <% } %>
+    </tbody>
+</table>
+</body>
+
+</html>

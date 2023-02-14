@@ -5,6 +5,14 @@ import { extendTime, buttonKillAyaka} from './functions/containerManager.js';
 import fs from 'node:fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import express from 'express';
+import { getDbData } from "./functions/getContainerData.js";
+var app = express();
+app.set("view engine", "ejs");
+app.set("views", "./views");
+var server = app.listen(3000, function () {
+    console.log(`Webパネル ${server.address().port}番での待受準備が出来ました`);
+});
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -153,3 +161,28 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.login(globalCfg.token);
+
+// ==================================================
+// Webパネル用
+// ==================================================
+
+app.get("/lists", async function (req, res) {
+    let result = await getDbData()
+    let container_list = new Array();
+    if (result.length == 0){
+        res.render("list",{
+            container_list:["","","","",""]
+        })
+    }else{
+
+    for(var i = 0; i < result.length; i++){
+        let user = (await client.users.fetch(result[i]["user_id"])).username;
+        let expired_at = new Date(result[i]["expired_at"]).toLocaleString('ja-JP');
+        let created_at = new Date(result[i]["created_at"]).toLocaleString('ja-JP');
+        container_list.push(Array(user, result[i]["container_name"], result[i]["available_ports"], created_at, expired_at))
+    }
+    res.render("list",{
+        container_list: container_list
+    });
+}
+});
