@@ -33,8 +33,8 @@ Dockerコンテナを用いた完全独立型個人開発環境構築サービ�
 {
     "host": "db",
     "user": "ayaka",
-    "database": "ayaka,
-    "password": "<secrets/db_userPass.txtのパスワード>",
+    "database": "ayaka",
+    "password": "<secrets/db_userPass.txtのパスワード>"
 }
 ```
 

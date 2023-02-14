@@ -30,14 +30,38 @@ export async function asighnPorts() { // 利用可能ポートを割り当てる
                         reject(err);
                     }
                     console.log(res[0].count);
-                    resolve(60000 + res[0].count);
+                    if(res[0].count == 0){
+                        resolve(60000);
+                    }else{
+                        db.execute(
+                            "SELECT available_ports FROM users",
+                            function(err,res){
+                                console.log(res);
+                                if(err){
+                                    console.log(err);
+                                    reject(err);
+                                }
+                                var port_list = []
+                                for(var i=0; i<res.length; i++){
+                                    port_list.push(Number(res[i]["available_ports"]))
+                                }
+                                port_list.sort((a, b) => a - b);
+                                var diff_list = []
+                                for(var i=Number(port_list[0]); i<=Number(port_list.slice(-1)[0]+1); i++){
+                                    diff_list.push(i)
+                                }
+                                console.log(port_list,diff_list);
+                                var result = diff_list.filter(i => port_list.indexOf(i) == -1).slice(-1)[0];
+                                console.log(result);
+                                resolve(result);
+                            }
+                        )
+                    }
                 }
             );
         } catch (err) {
             console.log(err);
             reject(err);
-        } finally {
-            db.end();
         }
     });
 }
@@ -173,9 +197,10 @@ export async function addRecord(cfg) {
                     if (err) {
                         console.log(err);
                         reject(err);
-                    }
+                    }else{
                     console.log("レコードを追加しました");
                     resolve(0);
+                    }
                 }
             );
         } catch (e) {
