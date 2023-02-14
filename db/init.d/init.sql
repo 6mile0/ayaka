@@ -7,6 +7,5 @@ create table ayaka.users(
     available_ports varchar(80) not null,
     created_at bigint not null,
     expired_at bigint not null,
-    interval_id int not null,
-    delete_flag bit not null
+    interval_id int not null
 );

@@ -9,9 +9,9 @@ import mysql from 'mysql2';
 // ポート割り当て関数
 // =====================================================================
 export async function asighnPorts() { // 利用可能ポートを割り当てる関数
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
+        let db = mysql.createConnection(dbCfg); // データベースに接続
         try {
-            let db = mysql.createConnection(dbCfg); // データベースに接続
             db.execute(
                 "SELECT * FROM users",
                 function (err, res) {
@@ -36,6 +36,8 @@ export async function asighnPorts() { // 利用可能ポートを割り当てる
         } catch (err) {
             console.log(err);
             reject(err);
+        } finally {
+            db.end();
         }
     });
 }
@@ -51,6 +53,8 @@ export async function makeUserFolder(cfg) {
                 fs.mkdirSync(`${globalCfg.mntPoint}/${cfg.userId}/config`, { recursive: true }); // ユーザーフォルダを作成
                 console.log("ユーザーフォルダを作成しました");
                 resolve(0);
+            } else {
+                resolve(0);
             }
         } catch (err) {
             reject(err);
@@ -65,9 +69,9 @@ export async function makeUserFolder(cfg) {
 export async function startUpAyaka(cfg, interaction) {
     return new Promise((resolve, reject) => {
         cfg.nowIimeMs = new Date().getTime(); // 現在時刻(ミリ秒)
-        cfg.expiredMs = nowIimeMs + 10800000;// 3時間後(自動削除予定時刻)
-        cfg.createdTime = new Date(nowIimeMs); // 生成時間
-        cfg.expiredTime = new Date(expiredMs); // 3時間後(自動削除予定時刻)
+        cfg.expiredMs = cfg.nowIimeMs + 10800000;// 3時間後(自動削除予定時刻)
+        cfg.createdTime = new Date(cfg.nowIimeMs); // 生成時間
+        cfg.expiredTime = new Date(cfg.expiredMs); // 3時間後(自動削除予定時刻)
         console.log(cfg);
 
         try {
@@ -160,22 +164,25 @@ export async function addProxy(cfg) { // 利用可能ポートを割り当てる
 // =====================================================================
 
 export async function addRecord(cfg) {
-    let db = mysql.createConnection(dbCfg); // データベースに接続
-    try {
-        db.execute(
-            `INSERT INTO users VALUES ("${cfg.userId}","${cfg.ctnId}","${cfg.containerName}","${cfg.pass}","${cfg.sudoPass}",${cfg.port},${cfg.nowIimeMs},${cfg.expiredMs},${cfg.intervalID})`,
-            function (err, res) {
-                if (err) {
-                    console.log(err);
-                    reject(err);
+    return new Promise(async (resolve, reject) => {
+        let db = mysql.createConnection(dbCfg); // データベースに接続
+        try {
+            db.execute(
+                `INSERT INTO users VALUES ("${cfg.userId}","${cfg.ctnId}","${cfg.containerName}","${cfg.pass}","${cfg.sudoPass}",${cfg.port},${cfg.nowIimeMs},${cfg.expiredMs},${cfg.intervalID})`,
+                function (err, res) {
+                    if (err) {
+                        console.log(err);
+                        reject(err);
+                    }
+                    console.log("レコードを追加しました");
+                    resolve(0);
                 }
-                resolve(0);
-            }
-        );
-    } catch (e) {
-        console.log(e);
-        reject(e);
-    } finally {
-        db.end();
-    }
+            );
+        } catch (e) {
+            console.log(e);
+            reject(e);
+        } finally {
+            db.end();
+        }
+    });
 }

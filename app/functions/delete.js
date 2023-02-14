@@ -11,23 +11,19 @@ export async function getCtnId(userId) {
         let db = mysql.createConnection(dbCfg); // データベースに接続
         try {
             db.execute(
-                `SELECT container_id FROM users WHERE user_id = ${userId}`,
+                `SELECT container_id,container_name FROM users WHERE user_id = ${userId}`,
                 function (err, res) {
                     if (err) {
                         console.log(err);
                         reject(err);
                     }
                     console.log(res);
-                    if (!res) {
-                        reject("コンテナが見つかりません");
+                    if (res.length == 0) {
+                        reject("レコードが存在しません");
                     } else {
-                        try {
-                            const ctnId = res[res.length - 1].container_id; // コンテナIDを取得(最新のもの)
-                            resolve(ctnId);
-                        } catch (e) {
-                            console.log(e);
-                            reject("コンテナが見つかりません");
-                        }
+                        const ctnId = res[0].container_id; // コンテナIDを取得(最新のもの)
+                        const ctnName = res[0].container_name; // コンテナIDを取得(最新のもの)
+                        resolve([ctnId, ctnName]);
                     }
                 }
             );
