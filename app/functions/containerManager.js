@@ -90,3 +90,18 @@ export async function extendTime(ctnId) {
         }
     });
 }
+export async function buttonKillAyaka(ctnId) {
+    return new Promise((resolve, reject) => {
+                try {
+                    var result = execSync(`docker kill $(docker ps -a -q -f name=${ctnId})`);
+                    console.log(result.toString().trim());
+                    if (result.toString().trim() == "") {
+                        reject("削除失敗"); // コンテナ削除失敗
+                    } else {
+                        resolve(ctnId); // コンテナ削除成功
+                    }
+                } catch (e) {
+                    reject([e]); // 例外1
+                }
+    });
+}

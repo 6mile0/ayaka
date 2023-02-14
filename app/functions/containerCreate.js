@@ -1,6 +1,6 @@
 import globalCfg from "../config.json" assert { type: "json" };
 import dbCfg from "../dbCredentials.json" assert { type: "json" };
-import { shitDownAyaka, delRecord } from './containerDelete.js';
+import { timerKillAyaka, delRecord } from './containerDelete.js';
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import mysql from 'mysql2';
@@ -110,7 +110,7 @@ export async function startUpAyaka(cfg, interaction) {
                         interaction.channel.send({ embeds: [timerEmbed] });
 
                         setTimeout(() => { // 3時間後にコンテナを削除
-                            Promise.all([shitDownAyaka(cfg.ctnId), delRecord(cfg.ctnId)]).then((res) => {
+                            Promise.all([timerKillAyaka(cfg.ctnId), delRecord(cfg.ctnId)]).then((res) => {
                                 console.log(res);
                                 if (res[0] == ctnId) {
                                     const message = new EmbedBuilder()
