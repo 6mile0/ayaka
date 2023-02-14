@@ -1,6 +1,6 @@
 import dbCfg from "../dbCredentials.json" assert { type: "json" };
 import mysql from 'mysql2';
-
+import { EmbedBuilder } from 'discord.js';
 export async function extendTime(ctnId) {
     return new Promise(async (resolve, reject) => {
         let db = mysql.createConnection(dbCfg); // データベースに接続

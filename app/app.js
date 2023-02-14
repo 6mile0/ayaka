@@ -1,7 +1,7 @@
 import globalCfg from "./config.json" assert { type: "json" }; // 設定ファイル読み込み
 import { Client, GatewayIntentBits, Collection, EmbedBuilder } from 'discord.js';
-import { getCtnId, buttonKillAyaka, delRecord } from './functions/containerManager.js';
-import { extendTime } from './functions/containerManager.js';
+import { getCtnId, delRecord } from './functions/containerDelete.js';
+import { extendTime, buttonKillAyaka} from './functions/containerManager.js';
 import fs from 'node:fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
