@@ -30,8 +30,6 @@ export async function getCtnId(userId) {
         } catch (err) {
             console.log(err);
             reject(err);
-        } finally {
-            db.end();
         }
     });
 }
@@ -89,8 +87,6 @@ export async function delRecord(ctnId) {
         } catch (err) {
             console.log(err);
             reject(err);
-        } finally {
-            db.end();
         }
     });
 }

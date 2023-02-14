@@ -1,5 +1,5 @@
 import globalCfg from "../config.json" assert { type: "json" };
-import { asighnPorts, makeUserFolder, startUpAyaka, addProxy, addRecord } from "../functions/create.js";
+import { asighnPorts, makeUserFolder, startUpAyaka, addProxy, addRecord } from "../functions/containerCreate.js";
 import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { nanoid, customAlphabet } from 'nanoid';
 const random = customAlphabet('1234567890abcdef', 16);
@@ -66,7 +66,6 @@ export default {
                             .setCustomId('extend')
                             .setLabel("利用期間を延長する(3h)")
                             .setStyle(ButtonStyle.Success)
-                            .setDisabled(true),
                     )
                     .addComponents(
                         new ButtonBuilder()

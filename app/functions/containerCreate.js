@@ -1,6 +1,6 @@
-import dbCfg from "../dbCredentials.json" assert { type: "json" };
 import globalCfg from "../config.json" assert { type: "json" };
-import { shitDownAyaka, delRecord } from './delete.js';
+import dbCfg from "../dbCredentials.json" assert { type: "json" };
+import { shitDownAyaka, delRecord } from './containerDelete.js';
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import mysql from 'mysql2';
@@ -12,16 +12,6 @@ export async function asighnPorts() { // 利用可能ポートを割り当てる
     return new Promise(async (resolve, reject) => {
         let db = mysql.createConnection(dbCfg); // データベースに接続
         try {
-            db.execute(
-                "SELECT * FROM users",
-                function (err, res) {
-                    if (err) {
-                        console.log(err);
-                        reject(err);
-                    }
-                    console.log(res);
-                }
-            );
             db.execute(
                 "SELECT COUNT(*) AS count FROM users",
                 function (err, res) {
@@ -197,17 +187,16 @@ export async function addRecord(cfg) {
                     if (err) {
                         console.log(err);
                         reject(err);
-                    }else{
-                    console.log("レコードを追加しました");
-                    resolve(0);
+                    } else {
+                        console.log(res);
+                        console.log("レコードを追加しました");
+                        resolve(0);
                     }
                 }
             );
         } catch (e) {
             console.log(e);
             reject(e);
-        } finally {
-            db.end();
         }
     });
 }
