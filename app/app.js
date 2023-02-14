@@ -5,6 +5,12 @@ import { extendTime } from './functions/containerManager.js';
 import fs from 'node:fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import express from 'express';
+
+var app = express();
+var server = app.listen(3000, function () {
+    console.log(`Webパネル ${server.address().port}番での待受準備が出来ました`);
+});
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -153,3 +159,11 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.login(globalCfg.token);
+
+// ==================================================
+// Webパネル用
+// ==================================================
+
+app.get("/", function (req, res) {
+    res.send('Hello World!');
+});
