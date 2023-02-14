@@ -1,6 +1,6 @@
-import dbCfg from "../dbCredentials.json" assert { type: "json" };
 import globalCfg from "../config.json" assert { type: "json" };
-import { shitDownAyaka, delRecord } from './delete.js';
+import dbCfg from "../dbCredentials.json" assert { type: "json" };
+import { shitDownAyaka, delRecord } from './containerDelete.js';
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import mysql from 'mysql2';
@@ -28,16 +28,28 @@ export async function asighnPorts() { // 利用可能ポートを割り当てる
                     if (err) {
                         console.log(err);
                         reject(err);
+                    } else {
+                        if (!(res[0].count == 0)) {
+                            db.execute(
+                                "SELECT available_ports FROM users",
+                                function (err, res) {
+                                    if (err) {
+                                        console.log(err);
+                                        reject(err);
+                                    } else {
+                                        resolve(res[0].port + 1);
+                                    }
+                                }
+                            );
+                        } else {
+                            resolve(60000);
+                        }
                     }
-                    console.log(res[0].count);
-                    resolve(60000 + res[0].count);
                 }
             );
         } catch (err) {
             console.log(err);
             reject(err);
-        } finally {
-            db.end();
         }
     });
 }
@@ -72,7 +84,6 @@ export async function startUpAyaka(cfg, interaction) {
         cfg.expiredMs = cfg.nowIimeMs + 10800000;// 3時間後(自動削除予定時刻)
         cfg.createdTime = new Date(cfg.nowIimeMs); // 生成時間
         cfg.expiredTime = new Date(cfg.expiredMs); // 3時間後(自動削除予定時刻)
-        console.log(cfg);
 
         try {
             var res = execSync(`docker run -d --name=${cfg.ctnId} -e PUID=${globalCfg.puId} -e PGID=${globalCfg.pgId} -e TZ=Asia/Tokyo -e PASSWORD=${cfg.pass} -e SUDO_PASSWORD=${cfg.sudoPass} -e DEFAULT_WORKSPACE=/config/workspace -p ${cfg.port}:8443 -v ${globalCfg.mntPoint}/${cfg.userId}/config:/config --restart unless-stopped ayaka/allpkg`);
@@ -84,7 +95,7 @@ export async function startUpAyaka(cfg, interaction) {
                     var dt = new Date(); // 現在時刻
                     if (dt.getTime() >= cfg.expiredMs) { // 3時間後ミリ秒一致時
                         const timerEmbed = new EmbedBuilder()
-                            .setColor("#ED4245")
+                            .setColor(0X00D7FF)
                             .setTitle('あなたのコンテナは停止されました')
                             .setDescription("3時間経過し、延長申請がなかったためコンテナを削除しました。\nご利用ありがとうございました。")
                             .addFields(
@@ -107,14 +118,14 @@ export async function startUpAyaka(cfg, interaction) {
                                             { name: 'コンテナ名', value: res[0] },
                                         )
                                         .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
-                                    interaction.reply({ ephemeral: true, embeds: [message] });
+                                    interaction.reply({ embeds: [message] });
                                 } else {
                                     const message = new EmbedBuilder()
                                         .setColor(0xFF0000)
                                         .setTitle('エラーが発生しました')
                                         .setDescription("[E1001] コンテナの削除に失敗しました。")
                                         .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
-                                    interaction.reply({ ephemeral: true, embeds: [message] });
+                                    interaction.reply({ embeds: [message] });
                                 }
                             }).catch((err) => {
                                 console.log(err);
@@ -123,7 +134,7 @@ export async function startUpAyaka(cfg, interaction) {
                                     .setTitle('エラーが発生しました')
                                     .setDescription("[E1001] コンテナの削除に失敗しました。")
                                     .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
-                                interaction.reply({ ephemeral: true, embeds: [message] });
+                                interaction.reply({ embeds: [message] });
                             });
                             clearInterval(intervalID);
                         });
@@ -132,6 +143,7 @@ export async function startUpAyaka(cfg, interaction) {
                 cfg.intervalID = intervalID; // タイマーIDを格納
                 console.log("タイマーを起動しました");
                 resolve(0);
+                console.log(cfg);
             }
         } catch (err) {
             reject(err);
@@ -173,16 +185,16 @@ export async function addRecord(cfg) {
                     if (err) {
                         console.log(err);
                         reject(err);
+                    } else {
+                        console.log(res);
+                        console.log("レコードを追加しました");
+                        resolve(0);
                     }
-                    console.log("レコードを追加しました");
-                    resolve(0);
                 }
             );
         } catch (e) {
             console.log(e);
             reject(e);
-        } finally {
-            db.end();
         }
     });
 }
