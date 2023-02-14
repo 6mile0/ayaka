@@ -33,8 +33,8 @@ GUILDID="<あなたのDiscordサーバーのID>"
 DB_HOST="db"
 DB_NAME="ayaka"
 DB_USER="ayaka"
-DB_PASS="Z3rKb2U2RNKSQdur6oFo"
-DB_ROOT_PASS="DdJ7mrLGq9v4D96iS7oT"
+DB_PASS="<任意のユーザパスワード>"
+DB_ROOT_PASS="<任意のrootパスワード>"
 
 ```
 
