@@ -96,7 +96,7 @@ export async function startUpAyaka(cfg, interaction) {
         console.log(cfg);
 
         try {
-            var res = execSync(`docker run -d --name=${cfg.ctnId} -e PUID=${globalCfg.PUID} -e PGID=${globalCfg.PGID} -e TZ=Asia/Tokyo -e PASSWORD=${cfg.pass} -e SUDO_PASSWORD=${cfg.sudoPass} -e DEFAULT_WORKSPACE=/config/workspace -p ${cfg.port}:8443 -v ${globalCfg.MNTPOINT}/${cfg.userId}/config:/config --restart unless-stopped ayaka/allpkg`);
+            var res = execSync(`docker run -d --name=${cfg.ctnId} --memory=1024mb -e PUID=${globalCfg.PUID} -e PGID=${globalCfg.PGID} -e TZ=Asia/Tokyo -e PASSWORD=${cfg.pass} -e SUDO_PASSWORD=${cfg.sudoPass} -e DEFAULT_WORKSPACE=/config/workspace -p ${cfg.port}:8443 -v ${globalCfg.MNTPOINT}/${cfg.userId}/config:/config --restart unless-stopped ayaka/allpkg`);
             if (res.toString().trim() == "") {
                 reject("コンテナの起動に失敗しました");
             } else {

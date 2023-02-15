@@ -6,18 +6,28 @@ import { extendTime, buttonKillAyaka } from './functions/containerManager.js';
 import { getDbData } from "./functions/getContainerData.js";
 import fs from 'node:fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import express from 'express';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
+
+// ==================================================
+// Express関連
+// ==================================================
 var app = express();
 app.set("view engine", "ejs");
 app.set("views", "./views");
+app.use(express.static(__dirname + '/public'));
 var server = app.listen(3000, function () {
     console.log(`Webパネル ${server.address().port}番での待受準備が出来ました`);
 });
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+
+// ==================================================
+// Discord.js関連
+// ==================================================
+
 const client = new Client({
     intents: Object.values(GatewayIntentBits).reduce((a, b) => a | b)
 });
@@ -152,8 +162,17 @@ client.on('interactionCreate', async interaction => {
                 interaction.reply({ embeds: [message] });
             });
             // ==================================================
-            // エクスポートボタンが押されたとき
+            // リセットボタンが押されたとき
             // ==================================================
+        } else if (interaction.customId === "reset") {
+            await interaction.reply({
+                content: "リセットボタンが押されました。"
+            });
+        } else if (interaction.customId === "link") {
+            await interaction.reply({
+                content: "エクスポートボタンが押されました。"
+            });
+
         } else if (interaction.customId === "export") {
             await interaction.reply({
                 content: "エクスポートボタンが押されました。"
@@ -168,22 +187,26 @@ client.login(globalCfg.TOKEN);
 // Webパネル用
 // ==================================================
 app.get("/lists", async function (req, res) {
-    let result = await getDbData()
-    let container_list = new Array();
-    if (result.length == 0){
-        res.render("list",{
-            container_list:["","","","",""]
-        })
-    }else{
-
-    for(var i = 0; i < result.length; i++){
-        let user = (await client.users.fetch(result[i]["user_id"])).username;
-        let expired_at = new Date(result[i]["expired_at"]).toLocaleString('ja-JP');
-        let created_at = new Date(result[i]["created_at"]).toLocaleString('ja-JP');
-        container_list.push(Array(user, result[i]["container_name"], result[i]["available_ports"], created_at, expired_at))
+    let resData = await getDbData(); // DBからデータを取得
+    if (!(resData[0] == 0)) { // 異常系
+        res.render("list", { ver: globalCfg.VER, ctnArr: "取得時にエラーが発生しました", ctnCnt: -1 })
+    } else { // 正常系
+        if (resData[1] == "0") { // データがない場合
+            res.render("list", { ver: globalCfg.VER, ctnArr: "データがありません", ctnCnt: 0 })
+        } else {
+            let arr = [];
+            let data = resData[1];
+            for (var i = 0; i < resData[1].length; i++) {
+                let user = await client.users.fetch(data[i]["user_id"]);
+                let expired_at = new Date(data[i]["expired_at"]).toLocaleString('ja-JP');
+                let created_at = new Date(data[i]["created_at"]).toLocaleString('ja-JP');
+                arr.push([user.username, data[i]["container_name"], data[i]["available_ports"], created_at, expired_at])
+            }
+            res.render("list", { ver: globalCfg.VER, ctnArr: arr, ctnCnt: arr.length });
+        }
     }
-    res.render("list",{
-        container_list: container_list
-    });
-}
+});
+
+app.get("/resource", async function (req, res) {
+    res.render("resource", { ver: globalCfg.VER });
 });

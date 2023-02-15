@@ -28,8 +28,8 @@ export async function getCtnId(userId) {
                     if (res.length == 0) {
                         reject("レコードが存在しません");
                     } else {
-                        const ctnId = res[0].container_id; // コンテナIDを取得(最新のもの)
-                        const ctnName = res[0].container_name; // コンテナIDを取得(最新のもの)
+                        const ctnId = res[res.length - 1].container_id; // コンテナIDを取得(最新のもの)
+                        const ctnName = res[res.length - 1].container_name; // コンテナIDを取得(最新のもの)
                         resolve([ctnId, ctnName]);
                     }
                 }

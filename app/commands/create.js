@@ -70,10 +70,22 @@ export default {
                     )
                     .addComponents(
                         new ButtonBuilder()
+                            .setCustomId('reset')
+                            .setLabel("ディレクトリ内をリセットする")
+                            .setStyle(ButtonStyle.Secondary)
+                    )
+                    .addComponents(
+                        new ButtonBuilder()
                             .setCustomId('export')
                             .setLabel("データをエクスポートする")
                             .setStyle(ButtonStyle.Primary)
                             .setDisabled(true),
+                    )
+                    .addComponents(
+                        new ButtonBuilder()
+                            .setLabel("コンテナ一覧")
+                            .setURL(`${globalCfg.SERVICEDOMAIN}:${globalCfg.PORTALPORT}/lists`)
+                            .setStyle(ButtonStyle.Link)
                     )
                 interaction.user.send({
                     embeds: [message], components: [controlBtn]
