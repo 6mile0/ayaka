@@ -9,7 +9,7 @@ export default {
     async execute(interaction) {
         console.log(interaction.user);
         const message = new EmbedBuilder()
-            .setColor(0xFF0000)
+            .setColor(0XE22B8A)
             .setTitle('コンテナリスト')
             .setDescription("下記URLをクリックしてアクセスしてください．\nhttp://localhost:8080/lists")
             .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
