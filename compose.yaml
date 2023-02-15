@@ -2,6 +2,8 @@ version: "3.9"
 services:
   bot:
     build: ./dockerfiles/bot
+    ports:
+      - 8080:3000
     volumes:
       - ./app:/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -26,17 +28,14 @@ services:
     environment:
       - MYSQL_DATABASE=ayaka
       - MYSQL_USER=ayaka
-      - MYSQL_PASSWORD_FILE=/run/secrets/db_password
-      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db_root_password
-    secrets:
-      - db_password
-      - db_root_password
+      - MYSQL_PASSWORD=${DB_PASS}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASS}
 
   nginx:
     build: ./dockerfiles/nginx
     restart: always
     ports:
-      - 8080:80
+      - 80:80
     networks:
       - br0
     depends_on:
@@ -51,9 +50,3 @@ volumes:
 networks:
   br0:
     driver: bridge
-
-secrets:
-  db_password:
-    file: ./secrets/db_userPass.txt
-  db_root_password:
-    file: ./secrets/db_rootPass.txt

@@ -1,6 +1,16 @@
-import dbCfg from "../dbCredentials.json" assert { type: "json" };
-import mysql from 'mysql2';
+import dotenv from 'dotenv';
+const globalCfg = dotenv.config().parsed; // 設定ファイル読み込み
 import { EmbedBuilder } from 'discord.js';
+import { timerKillAyaka, delRecord } from './containerDelete.js';
+import { execSync } from 'node:child_process';
+import mysql from 'mysql2';
+const dbCfg = {
+    host: globalCfg.DB_HOST,
+    user: globalCfg.DB_USER,
+    password: globalCfg.DB_PASS,
+    database: globalCfg.DB_NAME,
+}
+
 export async function extendTime(ctnId) {
     return new Promise(async (resolve, reject) => {
         let db = mysql.createConnection(dbCfg); // データベースに接続
@@ -34,7 +44,7 @@ export async function extendTime(ctnId) {
                                 interaction.channel.send({ embeds: [timerEmbed] });
 
                                 setTimeout(() => { // 3時間後にコンテナを削除
-                                    Promise.all([shitDownAyaka(ctnId), delRecord(ctnId)]).then((res) => {
+                                    Promise.all([timerKillAyaka(ctnId), delRecord(ctnId)]).then((res) => {
                                         console.log(res);
                                         if (res[0] == ctnId) {
                                             const message = new EmbedBuilder()
@@ -44,14 +54,14 @@ export async function extendTime(ctnId) {
                                                 .addFields(
                                                     { name: 'コンテナ名', value: res[0] },
                                                 )
-                                                .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
+                                                .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
                                             interaction.reply({ embeds: [message] });
                                         } else {
                                             const message = new EmbedBuilder()
                                                 .setColor(0xFF0000)
                                                 .setTitle('エラーが発生しました')
                                                 .setDescription("[E1001] コンテナの削除に失敗しました。")
-                                                .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
+                                                .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
                                             interaction.reply({ embeds: [message] });
                                         }
                                     }).catch((err) => {
@@ -60,7 +70,7 @@ export async function extendTime(ctnId) {
                                             .setColor(0xFF0000)
                                             .setTitle('エラーが発生しました')
                                             .setDescription("[E1001] コンテナの削除に失敗しました。")
-                                            .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
+                                            .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
                                         interaction.reply({ embeds: [message] });
                                     });
                                     clearInterval(intervalID);
@@ -92,16 +102,16 @@ export async function extendTime(ctnId) {
 }
 export async function buttonKillAyaka(ctnId) {
     return new Promise((resolve, reject) => {
-                try {
-                    var result = execSync(`docker kill $(docker ps -a -q -f name=${ctnId})`);
-                    console.log(result.toString().trim());
-                    if (result.toString().trim() == "") {
-                        reject("削除失敗"); // コンテナ削除失敗
-                    } else {
-                        resolve(ctnId); // コンテナ削除成功
-                    }
-                } catch (e) {
-                    reject([e]); // 例外1
-                }
+        try {
+            var result = execSync(`docker kill $(docker ps -a -q -f name=${ctnId})`);
+            console.log(result.toString().trim());
+            if (result.toString().trim() == "") {
+                reject("削除失敗"); // コンテナ削除失敗
+            } else {
+                resolve(ctnId); // コンテナ削除成功
+            }
+        } catch (e) {
+            reject([e]); // 例外1
+        }
     });
 }

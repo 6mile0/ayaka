@@ -1,12 +1,14 @@
-import globalCfg from "./config.json" assert { type: "json" }; // 設定ファイル読み込み
+import dotenv from 'dotenv';
+const globalCfg = dotenv.config().parsed; // 設定ファイル読み込み
 import { Client, GatewayIntentBits, Collection, EmbedBuilder } from 'discord.js';
 import { getCtnId, delRecord } from './functions/containerDelete.js';
-import { extendTime, buttonKillAyaka} from './functions/containerManager.js';
+import { extendTime, buttonKillAyaka } from './functions/containerManager.js';
+import { getDbData } from "./functions/getContainerData.js";
 import fs from 'node:fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import express from 'express';
-import { getDbData } from "./functions/getContainerData.js";
+
 var app = express();
 app.set("view engine", "ejs");
 app.set("views", "./views");
@@ -34,9 +36,9 @@ for (const file of commandFiles) {
 }
 
 
-console.log(`${globalCfg.botName} ${globalCfg.ver} を起動します...`);
+console.log(`${globalCfg.BOTNAME} ${globalCfg.VER} を起動します...`);
 client.once("ready", async () => {
-    client.user.setPresence({ activities: [{ name: "Ver " + globalCfg.ver }] });
+    client.user.setPresence({ activities: [{ name: "Ver " + globalCfg.VER }] });
     console.log("準備完了");
 });
 
@@ -56,7 +58,7 @@ client.on('interactionCreate', async interaction => {
                 .setColor(0xFF0000)
                 .setTitle('エラーが発生しました')
                 .setDescription("[E1001] コンテナの起動に失敗しました。")
-                .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
+                .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
             interaction.reply({ ephemeral: true, embeds: [message] });
             return;
         }
@@ -81,14 +83,14 @@ client.on('interactionCreate', async interaction => {
                                 { name: 'コンテナ名', value: ctnInfo[1] },
                                 { name: 'コンテナID', value: ctnInfo[0] },
                             )
-                            .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
+                            .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
                         interaction.reply({ embeds: [message] });
                     } else {
                         const message = new EmbedBuilder()
                             .setColor(0xFF0000)
                             .setTitle('エラーが発生しました')
                             .setDescription("[E1001] コンテナの削除に失敗しました。")
-                            .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
+                            .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
                         interaction.reply({ embeds: [message] });
                     }
                 }).catch((err) => {
@@ -97,7 +99,7 @@ client.on('interactionCreate', async interaction => {
                         .setColor(0xFF0000)
                         .setTitle('エラーが発生しました')
                         .setDescription("[E1001] コンテナの削除に失敗しました。")
-                        .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
+                        .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
                     interaction.reply({ embeds: [message] });
                 });
             }).catch((err) => {
@@ -105,8 +107,8 @@ client.on('interactionCreate', async interaction => {
                 const message = new EmbedBuilder()
                     .setColor(0xFF0000)
                     .setTitle('エラーが発生しました')
-                    .setDescription("削除するコンテナが見つかりませんでした。")
-                    .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
+                    .setDescription("対象コンテナが見つかりませんでした。")
+                    .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
                 interaction.reply({ embeds: [message] });
             });
 
@@ -137,7 +139,7 @@ client.on('interactionCreate', async interaction => {
                         .setColor(0xFF0000)
                         .setTitle('エラーが発生しました')
                         .setDescription("コンテナの延長に失敗しました。")
-                        .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
+                        .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
                     interaction.reply({ embeds: [message] });
                 });
             }).catch((err) => {
@@ -145,8 +147,8 @@ client.on('interactionCreate', async interaction => {
                 const message = new EmbedBuilder()
                     .setColor(0xFF0000)
                     .setTitle('エラーが発生しました')
-                    .setDescription("削除するコンテナが見つかりませんでした。")
-                    .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
+                    .setDescription("対象コンテナが見つかりませんでした。")
+                    .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
                 interaction.reply({ embeds: [message] });
             });
             // ==================================================
@@ -160,12 +162,11 @@ client.on('interactionCreate', async interaction => {
     }
 });
 
-client.login(globalCfg.token);
+client.login(globalCfg.TOKEN);
 
 // ==================================================
 // Webパネル用
 // ==================================================
-
 app.get("/lists", async function (req, res) {
     let result = await getDbData()
     let container_list = new Array();
