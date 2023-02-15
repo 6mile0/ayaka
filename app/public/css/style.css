@@ -1,0 +1,47 @@
+html, body {
+    font-family: "Yu Gothic", YuGothic, Verdana, 'Hiragino Kaku Gothic ProN', 'Hiragino Kaku Gothic Pro', 'ヒラギノ角ゴ Pro W3', 'メイリオ', Meiryo, sans-serif;
+    overflow-x: hidden;
+    display: flex;
+    flex-flow: column;
+    min-height: 100vh;
+}
+
+.nav-link a:link, :visited, :active {
+    color: #fff;
+}
+
+.nav-link:hover {
+    color: #bdbdbd !important;
+}
+
+.flex {
+    display: flex;
+    align-items: stretch;
+}
+
+.flex .title {
+    display: table-cell;
+    vertical-align: middle;
+    font-size: 28px;
+    font-weight: 500;
+    padding: 0.25em 0.5em;
+    color: #414141;
+    background: transparent;
+    border-left: solid 5px #3a3a3a;
+}
+
+.flex a {
+    display: flex;
+    align-items: center;
+    color: #313131;
+}
+
+.box2 {
+    border-radius: 10px;
+    padding: 20px;
+}
+
+
+.bg-nav-color {
+    background-color: #158e9e;
+}

@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 const globalCfg = dotenv.config().parsed; // 設定ファイル読み込み
 import { execSync } from 'node:child_process';
-import mysql from 'mysql2';
+import mysql from 'mysql2/promise';
 const dbCfg = {
     host: globalCfg.DB_HOST,
     user: globalCfg.DB_USER,
@@ -14,31 +14,19 @@ const dbCfg = {
 // =====================================================================
 
 export async function getCtnId(userId) {
-    return new Promise((resolve, reject) => {
-        let db = mysql.createConnection(dbCfg); // データベースに接続
-        try {
-            db.execute(
-                `SELECT container_id,container_name FROM users WHERE user_id = ${userId}`,
-                function (err, res) {
-                    if (err) {
-                        console.log(err);
-                        reject(err);
-                    }
-                    console.log(res);
-                    if (res.length == 0) {
-                        reject("レコードが存在しません");
-                    } else {
-                        const ctnId = res[0].container_id; // コンテナIDを取得(最新のもの)
-                        const ctnName = res[0].container_name; // コンテナIDを取得(最新のもの)
-                        resolve([ctnId, ctnName]);
-                    }
-                }
-            );
-        } catch (err) {
-            console.log(err);
-            reject(err);
+    let db = await mysql.createConnection(dbCfg); // データベースに接続
+    try {
+        let [res] = await db.execute(`SELECT container_id,container_name FROM users WHERE user_id = ${userId}`);
+        if (res.length == 0) {
+            throw new Error('あなたの作成したコンテナは一つも存在しません。');
+        } else {
+            const ctnId = res[res.length - 1].container_id; // コンテナIDを取得(最新のもの)
+            const ctnName = res[res.length - 1].container_name; // コンテナIDを取得(最新のもの)
+            return [ctnId, ctnName];
         }
-    });
+    } catch (e) {
+        throw e;
+    }
 }
 
 // =====================================================================
@@ -56,14 +44,14 @@ export async function timerKillAyaka(ctnId) {
                     console.log(result.toString().trim());
                     resolve(ctnId);
                 } catch (e) {
-                    reject([e]); // 例外1
+                    reject([e, 'D0002', 'コンテナの削除に失敗しました。詳細はエラーログをご確認ください。']); // 例外1
                 }
             } else {
                 console.log(res);
-                reject(`${ctnId}の外部接続設定に失敗しました`);
+                reject([res.toString().trim(), 'D0003', `${ctnId}の外部接続設定の削除に失敗しました。詳細はエラーログをご確認ください。`]);
             }
-        } catch {
-            reject("外部接続設定の解除で例外が発生しました");
+        } catch (e) {
+            reject([e, 'D0003', `${ctnId}の外部接続設定の削除に失敗しました。詳細はエラーログをご確認ください。`]); // 例外2
         }
     });
 }
@@ -73,23 +61,12 @@ export async function timerKillAyaka(ctnId) {
 // =====================================================================
 
 export async function delRecord(ctnId) {
-    return new Promise((resolve, reject) => {
-        let db = mysql.createConnection(dbCfg); // データベースに接続
-        try {
-            db.execute(
-                `DELETE FROM users WHERE container_id = "${ctnId}"`,
-                function (err, res) {
-                    if (err) {
-                        console.log(err);
-                        reject(err);
-                    }
-                    console.log(res);
-                    resolve(ctnId); // コンテナ削除成功
-                }
-            );
-        } catch (err) {
-            console.log(err);
-            reject(err);
-        }
-    });
+    let db = await mysql.createConnection(dbCfg); // データベースに接続
+    try {
+        let [res] = await db.execute(`DELETE FROM users WHERE container_id = "${ctnId}"`);
+        console.log(res);
+        return ctnId;
+    } catch (e) {
+        throw e;
+    }
 }
