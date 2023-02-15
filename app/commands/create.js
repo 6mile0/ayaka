@@ -1,4 +1,5 @@
-import globalCfg from "../config.json" assert { type: "json" };
+import dotenv from 'dotenv';
+const globalCfg = dotenv.config().parsed; // 設定ファイル読み込み
 import { asighnPorts, makeUserFolder, startUpAyaka, addProxy, addRecord } from "../functions/containerCreate.js";
 import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { nanoid, customAlphabet } from 'nanoid';
@@ -13,7 +14,7 @@ export default {
 
         const ports = await asighnPorts(); // 利用可能ポートを取得
         const containerInfo = {
-            "serviceDomain": globalCfg.serviceDomain, // サービスドメイン
+            "serviceDomain": globalCfg.SERVICEDOMAIN, // サービスドメイン
             "ctnId": random(12), // コンテナID
             "userId": interaction.user.id, // ユーザーID
             "containerName": "ayaka-" + random(8), // コンテナ名
@@ -35,7 +36,7 @@ export default {
                     .setColor(0x32cd32)
                     .setTitle('コンテナの作成に成功しました')
                     .setDescription("DMにコンテナへの接続情報を送信しました．\n只今より3時間で自動停止します．(DMのボタンより随時延長が可能です)")
-                    .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
+                    .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
                 interaction.reply({ embeds: [successfulCreate] });
 
                 const message = new EmbedBuilder()
@@ -52,7 +53,7 @@ export default {
                         { name: '利用可能ポート', value: String(containerInfo.port) },
                         { name: '収容サーバ', value: "JP-01" },
                     )
-                    .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
+                    .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
 
                 const controlBtn = new ActionRowBuilder()
                     .addComponents(
@@ -82,7 +83,7 @@ export default {
                     .setColor(0xFF0000)
                     .setTitle('エラーが発生しました')
                     .setDescription("[E1001] コンテナの起動に失敗しました。")
-                    .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
+                    .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
                 interaction.reply({ ephemeral: true, embeds: [message] });
             }
         }).catch((e) => {
@@ -91,7 +92,7 @@ export default {
                 .setColor(0xFF0000)
                 .setTitle('エラーが発生しました')
                 .setDescription("[E1001] コンテナの起動に失敗しました。")
-                .setFooter({ text: `ayaka Ver ${globalCfg.ver} `, iconURL: globalCfg.icon });
+                .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
             interaction.reply({ ephemeral: true, embeds: [message] });
         });
     },

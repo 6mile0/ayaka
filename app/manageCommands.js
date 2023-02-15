@@ -1,5 +1,6 @@
 import { REST, Routes } from 'discord.js';
-import cfg from './config.json' assert { type: 'json' };
+import dotenv from 'dotenv';
+const globalCfg = dotenv.config().parsed; // 設定ファイル読み込み
 import fs from 'node:fs';
 
 const commands = [];
@@ -10,7 +11,7 @@ for (const file of commandFiles) {
     commands.push(command.default.data.toJSON());
 }
 
-const rest = new REST({ version: '10' }).setToken(cfg.token);
+const rest = new REST({ version: '10' }).setToken(globalCfg.TOKEN);
 
 (async () => {
     if (process.argv.length < 3) {
@@ -22,7 +23,7 @@ const rest = new REST({ version: '10' }).setToken(cfg.token);
                 console.log(`${commands.length} 個のアプリケーションコマンドを削除します。`);
 
                 const data = await rest.put(
-                    Routes.applicationGuildCommands(cfg.clientId, cfg.guildId),
+                    Routes.applicationGuildCommands(globalCfg.CLIENTID, globalCfg.GUILDID),
                     { body: [] },
                 );
 
@@ -35,7 +36,7 @@ const rest = new REST({ version: '10' }).setToken(cfg.token);
                 console.log(`${commands.length} 個のアプリケーションコマンドを登録します。`);
 
                 const data = await rest.put(
-                    Routes.applicationGuildCommands(cfg.clientId, cfg.guildId),
+                    Routes.applicationGuildCommands(globalCfg.CLIENTID, globalCfg.GUILDID),
                     { body: commands },
                 );
 

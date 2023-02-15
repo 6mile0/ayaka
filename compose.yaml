@@ -28,11 +28,8 @@ services:
     environment:
       - MYSQL_DATABASE=ayaka
       - MYSQL_USER=ayaka
-      - MYSQL_PASSWORD_FILE=/run/secrets/db_password
-      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/db_root_password
-    secrets:
-      - db_password
-      - db_root_password
+      - MYSQL_PASSWORD=${DB_PASS}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASS}
 
   nginx:
     build: ./dockerfiles/nginx
@@ -53,9 +50,3 @@ volumes:
 networks:
   br0:
     driver: bridge
-
-secrets:
-  db_password:
-    file: ./secrets/db_userPass.txt
-  db_root_password:
-    file: ./secrets/db_rootPass.txt
