@@ -2,8 +2,7 @@ version: "3.9"
 services:
   bot:
     build: ./dockerfiles/bot
-    ports:
-      - 8080:3000
+    restart: on-failure
     volumes:
       - ./app:/app
       - /var/run/docker.sock:/var/run/docker.sock
@@ -13,10 +12,10 @@ services:
     command: bash -c "yarn install && yarn run dev"
     environment:
       TZ: Asia/Tokyo
-    networks:
-      - br0
+    network_mode: "host"
     depends_on:
       - db
+
   db:
     image: mariadb:latest
     restart: always
@@ -24,30 +23,15 @@ services:
       - ./db/init.d:/docker-entrypoint-initdb.d
       - ./db/my.cnf:/etc/mysql/conf.d/my.cnf
       - db-data:/var/lib/mysql
-    networks:
-      - br0
+    network_mode: "host"
     environment:
       - MYSQL_DATABASE=ayaka
       - MYSQL_USER=ayaka
       - MYSQL_PASSWORD=${DB_PASS}
       - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASS}
 
-  nginx:
-    build: ./dockerfiles/nginx
-    restart: always
-    ports:
-      - 80:80
-    networks:
-      - br0
-    depends_on:
-      - bot
-
 volumes:
   node_modules:
     driver: local
   db-data:
     driver: local
-
-networks:
-  br0:
-    driver: bridge

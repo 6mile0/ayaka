@@ -36,6 +36,7 @@ export default {
 
             // コンテナ作成
             Promise.all([makeUserFolder(containerInfo), startUpAyaka(containerInfo, interaction), addProxy(containerInfo), addRecord(containerInfo)]).then(async (res) => {
+                console.log(res);
                 if (!(res[0] == 0 && res[1] == 0 && res[2] == 0 && res[3] == 0)) throw ['引数が合いません。作成処理に失敗した可能性があります。'];
 
                 // コンテナ作成通知

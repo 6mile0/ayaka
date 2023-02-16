@@ -1,13 +1,15 @@
 import dotenv from 'dotenv';
 const globalCfg = dotenv.config().parsed; // 設定ファイル読み込み
 import { EmbedBuilder } from 'discord.js';
-import { timerKillAyaka, delRecord } from './containerDelete.js';
+import { killAyaka, delRecord } from './containerDelete.js';
 import { errorMsg } from './common.js';
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import mysql from 'mysql2/promise';
+import axios from 'axios';
 const dbCfg = {
     host: globalCfg.DB_HOST,
+    port: 3306,
     user: globalCfg.DB_USER,
     password: globalCfg.DB_PASS,
     database: globalCfg.DB_NAME,
@@ -86,7 +88,7 @@ export async function makeUserFolder(cfg) {
 export async function startUpAyaka(cfg, interaction) {
     return new Promise((resolve, reject) => {
         cfg.nowIimeMs = new Date().getTime(); // 現在時刻(ミリ秒)
-        cfg.expiredMs = cfg.nowIimeMs + 10800000;// 3時間後(自動削除予定時刻)
+        cfg.expiredMs = cfg.nowIimeMs + 10000;// 3時間後(自動削除予定時刻)
         cfg.createdTime = new Date(cfg.nowIimeMs); // 生成時間
         cfg.expiredTime = new Date(cfg.expiredMs); // 3時間後(自動削除予定時刻)
         console.log(cfg);
@@ -114,7 +116,7 @@ export async function startUpAyaka(cfg, interaction) {
                     interaction.channel.send({ embeds: [timerEmbed] });
 
                     setTimeout(() => { // 3時間後にコンテナを削除
-                        Promise.all([timerKillAyaka(cfg.ctnId), delRecord(cfg.ctnId)]).then((res) => {
+                        Promise.all([killAyaka(cfg.ctnId), delRecord(cfg.ctnId)]).then((res) => {
                             console.log(res);
                             // コンテナID不一致 => 削除処理で何らかの例外発生
                             if (!(res[0] == cfg.ctnId)) throw new Error('削除対象のコンテナIDが一致しません。削除処理に失敗した可能性があります。');
@@ -153,21 +155,30 @@ export async function startUpAyaka(cfg, interaction) {
 // プロキシ設定追加関数
 // =====================================================================
 
-export async function addProxy(cfg) { // 利用可能ポートを割り当てる関数
-    return new Promise((resolve, reject) => {
-        try {
-            var res = execSync(`docker exec ayaka-nginx-1 sh /etc/nginx/conf.d/add.sh ${cfg.ctnId} ${cfg.port}`); // ポートを追加
-            if (res.toString().trim() == "Reloading nginx: nginx.") {
-                resolve(0);
-            } else {
-                console.log(res.toString());
-                reject([res.toString(), "C0005", `${cfg.ctnId}の外部接続設定に失敗しました。詳細はエラーログをご確認ください。`]);
-            }
-        } catch (e) {
-            reject([e, "C0005", `${cfg.ctnId}の外部接続設定に失敗しました。詳細はエラーログをご確認ください。`]);
-        }
-    });
-};
+export async function addProxy(cfg) {
+    const res = await pushApi(cfg); // APIにプロキシ設定を追加
+    console.log(res.data.result);
+    // APIレスポンスがsuccess以外の場合はエラーを返す
+    if (!(res.data.result == "success")) throw res.data.err;
+    console.log("プロキシ設定を追加しました")
+    return 0;
+}
+
+async function pushApi(cfg) {
+    return await axios
+        .post(`${globalCfg.APIPOINT}/addproxy/`, {
+            "servicename": "ayaka",
+            "locationpath": `/attach/${cfg.ctnId}`,
+            "serverip": globalCfg.SERVERIP,
+            "serviceport": cfg.port,
+            "domainname": globalCfg.TOPDOMAIN,
+        })
+        .then((res) => {
+            return res
+        }).catch((err) => {
+            return err
+        });
+}
 
 // =====================================================================
 // データベースにレコードを追加する関数
