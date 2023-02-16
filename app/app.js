@@ -2,7 +2,8 @@ import dotenv from 'dotenv';
 const globalCfg = dotenv.config().parsed; // 設定ファイル読み込み
 import { Client, GatewayIntentBits, Collection, EmbedBuilder } from 'discord.js';
 import { getCtnId, delRecord } from './functions/containerDelete.js';
-import { extendTime, buttonKillAyaka, delUserDir } from './functions/containerManager.js';
+import { extendTime, delUserDir } from './functions/containerManager.js';
+import { killAyaka } from './functions/containerDelete.js';
 import { getDbData } from "./functions/getContainerData.js";
 import { errorMsg } from './functions/common.js';
 import fs from 'node:fs';
@@ -20,7 +21,7 @@ var app = express();
 app.set("view engine", "ejs");
 app.set("views", "./views");
 app.use(express.static(__dirname + '/public'));
-var server = app.listen(3000, function () {
+var server = app.listen(globalCfg.PORTALPORT, function () {
     console.log(`Webパネル ${server.address().port}番での待受準備が出来ました`);
 });
 
@@ -83,7 +84,7 @@ client.on('interactionCreate', async interaction => {
             await getCtnId(userId).then((ctnInfo) => { // コンテナID・コンテナ名を取得
                 console.log(ctnInfo[0]); // コンテナIDを表示
 
-                Promise.all([buttonKillAyaka(ctnInfo[0]), delRecord(ctnInfo[0])]).then(async (res) => {
+                Promise.all([killAyaka(ctnInfo[0]), delRecord(ctnInfo[0])]).then(async (res) => {
                     console.log(res[0]);
                     if (!(res[0] == ctnInfo[0])) throw new Error('削除対象のコンテナIDが一致しません。削除処理に失敗した可能性があります。');
 

@@ -3,6 +3,7 @@ const globalCfg = dotenv.config().parsed; // 設定ファイル読み込み
 import mysql from 'mysql2/promise';
 const dbCfg = {
     host: globalCfg.DB_HOST,
+    port: 3306,
     user: globalCfg.DB_USER,
     password: globalCfg.DB_PASS,
     database: globalCfg.DB_NAME,

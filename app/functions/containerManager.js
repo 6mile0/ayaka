@@ -1,12 +1,13 @@
 import dotenv from 'dotenv';
 const globalCfg = dotenv.config().parsed; // 設定ファイル読み込み
 import { EmbedBuilder } from 'discord.js';
-import { timerKillAyaka, delRecord } from './containerDelete.js';
+import { killAyaka, delRecord } from './containerDelete.js';
 import { errorMsg } from './common.js';
 import { execSync } from 'node:child_process';
 import mysql from 'mysql2/promise';
 const dbCfg = {
     host: globalCfg.DB_HOST,
+    port: 3306,
     user: globalCfg.DB_USER,
     password: globalCfg.DB_PASS,
     database: globalCfg.DB_NAME,
@@ -43,7 +44,7 @@ export async function extendTime(ctnId, interaction) {
                 interaction.channel.send({ embeds: [timerEmbed] });
 
                 setTimeout(() => { // 3時間後にコンテナを削除
-                    Promise.all([timerKillAyaka(ctnId), delRecord(ctnId)]).then((res) => {
+                    Promise.all([killAyaka(ctnId), delRecord(ctnId)]).then((res) => {
                         console.log(res);
                         // コンテナID不一致 => 削除処理で何らかの例外発生
                         if (!(res[0] == ctnId)) throw new Error('削除対象のコンテナIDが一致しません。削除処理に失敗した可能性があります。');
@@ -74,26 +75,6 @@ export async function extendTime(ctnId, interaction) {
         console.log(e);
         throw e;
     }
-}
-
-// =====================================================================
-// コンテナ削除関数(ボタン押下時)
-// =====================================================================
-
-export async function buttonKillAyaka(ctnId) {
-    return new Promise((resolve, reject) => {
-        try {
-            var result = execSync(`docker kill $(docker ps -a -q -f name=${ctnId})`);
-            console.log(result.toString().trim());
-            if (result.toString().trim() == "") {
-                reject("削除失敗"); // コンテナ削除失敗
-            } else {
-                resolve(ctnId); // コンテナ削除成功
-            }
-        } catch (e) {
-            reject([e, 'M0002', 'コンテナの削除に失敗しました。詳細はエラーログをご確認ください。']); // 例外1
-        }
-    });
 }
 
 // =====================================================================
