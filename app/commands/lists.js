@@ -11,8 +11,9 @@ export default {
         const message = new EmbedBuilder()
             .setColor(0XE22B8A)
             .setTitle('コンテナリスト')
-            .setDescription("下記URLをクリックしてアクセスしてください．\nhttp://localhost:8080/lists")
+            .setDescription(`下記URLをクリックしてアクセスしてください．\n${globalCfg.SERVICEDOMAIN}:${globalCfg.PORTALPORT}/lists`)
             .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
         interaction.reply({ embeds: [message] });
     },
 };
+ro
