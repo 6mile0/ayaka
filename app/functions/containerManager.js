@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 const globalCfg = dotenv.config().parsed; // 設定ファイル読み込み
 import { EmbedBuilder } from 'discord.js';
 import { timerKillAyaka, delRecord } from './containerDelete.js';
-import { errorMsg } from './functions/common.js';
+import { errorMsg } from './common.js';
 import { execSync } from 'node:child_process';
 import mysql from 'mysql2/promise';
 const dbCfg = {
