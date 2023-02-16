@@ -18,7 +18,7 @@ export async function getCtnId(userId) {
     try {
         let [res] = await db.execute(`SELECT container_id,container_name FROM users WHERE user_id = ${userId}`);
         if (res.length == 0) {
-            throw new Error('あなたの作成したコンテナは一つも存在しません。');
+            throw ['あなたの作成したコンテナは一つも存在しないか見つかりませんでした。', 'D0001', 'コンテナがありません。作成をお試しください。'];
         } else {
             const ctnId = res[res.length - 1].container_id; // コンテナIDを取得(最新のもの)
             const ctnName = res[res.length - 1].container_name; // コンテナIDを取得(最新のもの)

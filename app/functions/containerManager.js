@@ -21,7 +21,7 @@ export async function extendTime(ctnId, interaction) {
     try {
         let [res] = await db.execute(`SELECT container_name,created_at,expired_at,interval_id FROM users WHERE container_id = '${ctnId}'`);
 
-        if (res.length == 0) throw new Error('あなたの作成したコンテナは一つも存在しないか見つかりませんでした。');
+        if (res.length == 0) throw ['あなたの作成したコンテナは一つも存在しないか見つかりませんでした。', 'M0001', 'コンテナがありません。作成をお試しください。'];
 
         clearInterval(res[0]["interval_id"]); // 既存のタイマーを解除
         let expiredMs = res[0]["expired_at"] + 10800000;// 3時間後(自動削除予定時刻)
@@ -67,7 +67,7 @@ export async function extendTime(ctnId, interaction) {
             }
         }, 1000);
 
-        let [updateRes] = await db.execute(`UPDATE users SET interval_id = '${intervalID}' WHERE container_id = '${ctnId}'`);
+        let [updateRes] = await db.execute(`UPDATE users SET interval_id = '${intervalID}', expired_at = ${expiredMs} WHERE container_id = '${ctnId}'`);
         console.log(updateRes);
         return [expiredMs, ctnId];
     } catch (e) {
@@ -104,14 +104,14 @@ export async function delUserDir(userId) {
     let db = await mysql.createConnection(dbCfg); // データベースに接続
     try {
         let [res] = await db.execute(`SELECT container_id FROM users WHERE user_id = ${userId}`);
-        if (res.length == 0) throw ['NULL', 'M0004', 'あなたの作成したコンテナが一つ以上存在しているため，削除作業を継続出来ません。コンテナを削除してから再度お試しください。'];
+        if (!(res.length == 0)) throw ['あなたの作成したコンテナが一つ以上存在しているため，削除作業を継続出来ません。', 'M0003', '入出力処理の安全のため、全コンテナの停止を確認できないと削除処理を行うことは出来ません。コンテナを削除して再度お試しください。'];
         var result = execSync(`rm -rf /userData/${userId}`);
         console.log(result.toString().trim());
 
         if (result.toString().trim() == "") {
             return 0; // ユーザフォルダ削除成功
         } else {
-            throw [result.toString().trim(), 'M0005', 'ユーザデータの削除に失敗しました。詳細はエラーログをご確認ください。']; // ユーザフォルダ削除失敗
+            throw [result.toString().trim(), 'M0004', 'ユーザデータの削除に失敗しました。詳細はエラーログをご確認ください。']; // ユーザフォルダ削除失敗
         }
     } catch (e) {
         throw e;
