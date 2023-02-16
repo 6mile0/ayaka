@@ -16,4 +16,3 @@ export default {
         interaction.reply({ embeds: [message] });
     },
 };
-ro
