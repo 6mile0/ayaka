@@ -117,13 +117,13 @@ export async function startUpAyaka(cfg, interaction) {
 
                     setTimeout(() => { // 3時間後にコンテナを削除
                         // 直列処理
-                        killAyaka(ctnInfo[0]).then((res1) => {
-                            if (res1[0] == ctnInfo[0]) throw new Error('コンテナの停止に失敗したか、プロキシ連携解除に失敗しました。');
+                        killAyaka(cfg.ctnId, cfg.containerName).then((res1) => {
+                            if (res1[0] == cfg.ctnId) throw new Error('コンテナの停止に失敗したか、プロキシ連携解除に失敗しました。');
                             console.log(res1);
                             result.push(res1);
-                            return delRecord(ctnInfo[0]); // データベースから削除
+                            return delRecord(cfg.ctnId); // データベースから削除
                         }).then((res2) => {
-                            if (res2[0] == ctnInfo[0]) throw new Error('レコードの削除に失敗しました。');
+                            if (res2[0] == cfg.ctnId) throw new Error('レコードの削除に失敗しました。');
                             console.log(res2);
                             result.push(res2);
                             return result
@@ -178,11 +178,10 @@ export async function addProxy(cfg) {
 async function pushApi(cfg) {
     return await axios
         .post(`${globalCfg.APIPOINT}/addproxy/`, {
-            "servicename": "ayaka",
-            "locationpath": `/attach/${cfg.ctnId}`,
-            "serverip": globalCfg.SERVERIP,
-            "serviceport": cfg.port,
-            "domainname": globalCfg.TOPDOMAIN,
+            "domain_name": cfg.containerName,
+            "port": cfg.port,
+            "target_ip": globalCfg.SERVERIP,
+            " service_name": "ayaka",
         })
         .then((res) => {
             return res

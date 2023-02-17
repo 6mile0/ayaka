@@ -83,12 +83,13 @@ client.on('interactionCreate', async interaction => {
         if (interaction.customId === "stop") {
             await getCtnId(userId).then((ctnInfo) => { // コンテナID・コンテナ名を取得
                 console.log(ctnInfo[0]); // コンテナIDを表示
+                console.log(ctnInfo[1]); // コンテナ名を表示
 
                 // 結果を格納する配列
                 let result = [];
 
                 // 直列処理
-                killAyaka(ctnInfo[0]).then((res1) => {
+                killAyaka(ctnInfo[0], ctnInfo[1]).then((res1) => {
                     if (res1[0] == ctnInfo[0]) throw new Error('コンテナの停止に失敗したか、プロキシ連携解除に失敗しました。');
                     console.log(res1);
                     result.push(res1);
