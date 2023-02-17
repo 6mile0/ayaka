@@ -15,26 +15,49 @@ Dockerコンテナを用いた完全独立型個人開発環境構築サービ�
 # bot資格情報
 # ========================================
 
+# botの名前
 BOTNAME="ayaka"
-VER="1.0.0"
+# バージョン定義
+VER=""
+# アイコン画像URL
 ICON="https://i.imgur.com/Wu4xmU5.png"
-SERVICE_DOMAIN="https://<任意のドメイン>/"
-MNTPOINT="<任意のコンテナ生成時ユーザデータ保管場所>"
+# 最上位ドメインを指定 ex) cybroad.dev 
+# ※開発時適当でOK
+TOPDOMAIN="cybroad.dev"
+# エディタにアクセスする際のURL ex) http://ayaka.cybroad.dev
+# ※開発時適当でOK
+SERVICEDOMAIN=""
+# リバースプロキシ連携時に使用するAPIエンドポイントを指定 ex) http://localhost:9020
+# ※別途レポジトリから落としてきてください
+APIPOINT="http://localhost:9020/api/v1"
+# Ayakaが設置されているサーバのIPアドレスを指定
+# ※開発時には空欄でOK
+SERVERIP=""
+# コンテナ一覧を立ち上げリッスンするポートを指定
+PORTALURL=""
+# ユーザデータの保管先を指定
+MNTPOINT=""
+# コンテナ内のユーザIDを指定(通常は1000)
 PUID="1000"
+# コンテナ内のグループIDを指定(通常は1000)
 PGID="1000"
-TOKEN="<あなたのDiscord botのトークン>"
-CLIENTID="<あなたのDiscord botのクライアントID>"
-GUILDID="<あなたのDiscordサーバーのID>"
+# Discordのトークンを指定
+TOKEN=""
+# あなたのDiscord botのクライアントIDを指定
+CLIENTID=""
+# あなたのDiscord botのギルドIDを指定
+GUILDID=""
 
 # ========================================
 # データベース資格情報
 # ========================================
 
-DB_HOST="db"
+DB_HOST="localhost"
 DB_NAME="ayaka"
 DB_USER="ayaka"
 DB_PASS="<任意のユーザパスワード>"
 DB_ROOT_PASS="<任意のrootパスワード>"
+
 
 ```
 

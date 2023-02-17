@@ -86,7 +86,7 @@ export default {
                     .addComponents(
                         new ButtonBuilder()
                             .setLabel("コンテナ一覧")
-                            .setURL(`${globalCfg.SERVICEDOMAIN}:${globalCfg.PORTALPORT}/lists`)
+                            .setURL(`${globalCfg.SERVICEDOMAIN}/cp/lists`)
                             .setStyle(ButtonStyle.Link)
                     )
                 await interaction.user.send({
