@@ -116,10 +116,20 @@ export async function startUpAyaka(cfg, interaction) {
                     interaction.channel.send({ embeds: [timerEmbed] });
 
                     setTimeout(() => { // 3時間後にコンテナを削除
-                        Promise.all([killAyaka(cfg.ctnId), delRecord(cfg.ctnId)]).then((res) => {
-                            console.log(res);
-                            // コンテナID不一致 => 削除処理で何らかの例外発生
-                            if (!(res[0] == cfg.ctnId)) throw new Error('削除対象のコンテナIDが一致しません。削除処理に失敗した可能性があります。');
+                        // 直列処理
+                        killAyaka(ctnInfo[0]).then((res1) => {
+                            if (res1[0] == ctnInfo[0]) throw new Error('コンテナの停止に失敗したか、プロキシ連携解除に失敗しました。');
+                            console.log(res1);
+                            result.push(res1);
+                            return delRecord(ctnInfo[0]); // データベースから削除
+                        }).then((res2) => {
+                            if (res2[0] == ctnInfo[0]) throw new Error('レコードの削除に失敗しました。');
+                            console.log(res2);
+                            result.push(res2);
+                            return result
+                        }).then(async (allRes) => {
+                            console.log(allRes);
+                            if (!(allRes[0][0] == allRes[1][0])) throw new Error('削除対象のコンテナIDが一致しません。削除処理に失敗した可能性があります。');
 
                             const message = new EmbedBuilder()
                                 .setColor(0X32CD32)
@@ -129,11 +139,12 @@ export async function startUpAyaka(cfg, interaction) {
                                     { name: 'コンテナ名', value: res[0] },
                                 )
                                 .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
-                            interaction.user.send({ ephemeral: true, embeds: [message] });
+                            await interaction.user.send({ ephemeral: true, embeds: [message] });
                         }).catch(async (e) => {
-                            // 削除処理で何らかの例外発生
+                            console.log(e);
+                            // コンテナ削除に失敗した場合
                             if (e.length == 3) await errorMsg(interaction, e[0], e[1], e[2]);
-                            else await errorMsg(interaction, e);
+                            else errorMsg(interaction, e);
                         });
                         clearInterval(intervalID);
                     });

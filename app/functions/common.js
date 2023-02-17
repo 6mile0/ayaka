@@ -18,7 +18,7 @@ export async function errorMsg(
             { name: 'エラー内容', value: "```" + e + "```" },
         )
         .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
-    await interaction.reply({ embeds: [message] });
+    await interaction.channel.send({ embeds: [message] });
 }
 
 export async function successMsg(interaction, title = "操作に成功しました", msg) {
@@ -27,5 +27,5 @@ export async function successMsg(interaction, title = "操作に成功しまし�
         .setTitle(title)
         .setDescription(msg)
         .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
-    await interaction.reply({ embeds: [message] });
+    await interaction.channel.send({ embeds: [message] });
 }
