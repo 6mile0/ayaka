@@ -35,7 +35,7 @@ export async function getCtnId(userId) {
 // コンテナ削除関数(ボタン・タイマー共通)
 // =====================================================================
 
-export async function killAyaka(ctnId) {
+export async function killAyaka(ctnId, ctnName) {
     return new Promise(async (resolve, reject) => {
         let db = await mysql.createConnection(dbCfg); // データベースに接続
         try {
@@ -56,7 +56,7 @@ export async function killAyaka(ctnId) {
             clearInterval(res[0]["interval_id"]); // 既存のタイマーを解除
             console.log("タイマーを解除しました");
 
-            const resApi = await pushApi(ctnId); // APIにプロキシ設定を削除するリクエストを送信
+            const resApi = await pushApi(ctnName); // APIにプロキシ設定を削除するリクエストを送信
             console.log(resApi.data.result);
             // APIレスポンスがsuccess以外の場合はエラーを返す
             if (!(resApi.data.result == "success")) throw resApi.data.err;
@@ -68,12 +68,10 @@ export async function killAyaka(ctnId) {
     });
 }
 
-async function pushApi(ctnId) {
+async function pushApi(ctnName) {
     return await axios
         .post(`${globalCfg.APIPOINT}/remvproxy/`, {
-            "servicename": "ayaka",
-            "locationpath": `/attach/${ctnId}`,
-            "domainname": globalCfg.TOPDOMAIN,
+            "domain_name": ctnName,
         })
         .then((res) => {
             return res
