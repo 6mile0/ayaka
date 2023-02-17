@@ -39,8 +39,14 @@ export async function killAyaka(ctnId) {
     return new Promise(async (resolve, reject) => {
         let db = await mysql.createConnection(dbCfg); // データベースに接続
         try {
-            var result = execSync(`docker kill $(docker ps -a -q -f name=${ctnId})`);
-            console.log(result.toString().trim());
+            var exsistCtn = execSync(`docker container ls -q -f name="${ctnId}"`);
+            console.log(exsistCtn.toString().trim());
+            if (!(exsistCtn.toString().trim() == "")) {
+                var result = execSync(`docker kill $(docker ps -a -q -f name=${ctnId})`);
+                console.log(result.toString().trim());
+            } else {
+                console.log("コンテナが存在しませんので削除をスキップします");
+            }
         } catch (e) {
             reject([e, 'D0002', 'コンテナの削除に失敗しました。詳細はエラーログをご確認ください。']); // 例外1
         }
