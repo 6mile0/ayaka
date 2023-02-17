@@ -34,7 +34,7 @@ APIPOINT="http://localhost:9020/api/v1"
 # ※開発時には空欄でOK
 SERVERIP=""
 # コンテナ一覧を立ち上げリッスンするポートを指定
-PORTALPORT="8080"
+PORTALURL=""
 # ユーザデータの保管先を指定
 MNTPOINT=""
 # コンテナ内のユーザIDを指定(通常は1000)
