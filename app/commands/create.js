@@ -47,7 +47,7 @@ export default {
                     .setTitle('コンテナが準備できたよ！')
                     .setDescription("開発環境の生成が完了しました。以下の情報を確認してください。")
                     .addFields(
-                        { name: 'アクセスURL', value: `${containerInfo.serviceDomain}/${containerInfo.ctnId}/login` },
+                        { name: 'アクセスURL', value: `${containerInfo.serviceDomain}/attach/${containerInfo.ctnId}/login` },
                         { name: 'コンテナ名', value: containerInfo.containerName },
                         { name: 'エディタログインパスワード', value: "`" + containerInfo.pass + "`" },
                         { name: 'sudoパスワード', value: "`" + containerInfo.sudoPass + "`" },
