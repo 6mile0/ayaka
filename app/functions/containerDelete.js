@@ -36,28 +36,30 @@ export async function getCtnId(userId) {
 // =====================================================================
 
 export async function killAyaka(ctnId) {
-    let db = await mysql.createConnection(dbCfg); // データベースに接続
-    try {
-        var result = execSync(`docker kill $(docker ps -a -q -f name=${ctnId})`);
-        console.log(result.toString().trim());
-    } catch (e) {
-        return [e, 'D0002', 'コンテナの削除に失敗しました。詳細はエラーログをご確認ください。']; // 例外1
-    }
-    try {
-        let [res] = await db.execute(`SELECT interval_id FROM users WHERE container_id = '${ctnId}'`);
-        console.log(res[0]["interval_id"]);
-        clearInterval(res[0]["interval_id"]); // 既存のタイマーを解除
-        console.log("タイマーを解除しました");
+    return new Promise(async (resolve, reject) => {
+        let db = await mysql.createConnection(dbCfg); // データベースに接続
+        try {
+            var result = execSync(`docker kill $(docker ps -a -q -f name=${ctnId})`);
+            console.log(result.toString().trim());
+        } catch (e) {
+            reject([e, 'D0002', 'コンテナの削除に失敗しました。詳細はエラーログをご確認ください。']); // 例外1
+        }
+        try {
+            let [res] = await db.execute(`SELECT interval_id FROM users WHERE container_id = '${ctnId}'`);
+            console.log(res[0]["interval_id"]);
+            clearInterval(res[0]["interval_id"]); // 既存のタイマーを解除
+            console.log("タイマーを解除しました");
 
-        const resApi = await pushApi(ctnId); // APIにプロキシ設定を削除するリクエストを送信
-        console.log(resApi.data.result);
-        // APIレスポンスがsuccess以外の場合はエラーを返す
-        if (!(resApi.data.result == "success")) throw resApi.data.err;
-        console.log("プロキシ設定を削除しました")
-        return ctnId;
-    } catch (e) {
-        return e; // 例外2
-    }
+            const resApi = await pushApi(ctnId); // APIにプロキシ設定を削除するリクエストを送信
+            console.log(resApi.data.result);
+            // APIレスポンスがsuccess以外の場合はエラーを返す
+            if (!(resApi.data.result == "success")) throw resApi.data.err;
+            console.log("プロキシ設定を削除しました")
+            resolve(ctnId);
+        } catch (e) {
+            reject([e]); // 例外2
+        }
+    });
 }
 
 async function pushApi(ctnId) {
@@ -79,12 +81,14 @@ async function pushApi(ctnId) {
 // =====================================================================
 
 export async function delRecord(ctnId) {
-    let db = await mysql.createConnection(dbCfg); // データベースに接続
-    try {
-        let [res] = await db.execute(`DELETE FROM users WHERE container_id = "${ctnId}"`);
-        console.log(res);
-        return ctnId;
-    } catch (e) {
-        throw e;
-    }
+    return new Promise(async (resolve, reject) => {
+        let db = await mysql.createConnection(dbCfg); // データベースに接続
+        try {
+            let [res] = await db.execute(`DELETE FROM users WHERE container_id = "${ctnId}"`);
+            console.log(res);
+            resolve(ctnId);
+        } catch (e) {
+            reject([e]);
+        }
+    });
 }
