@@ -157,7 +157,7 @@ export async function startUpAyaka(cfg, interaction) {
 
 export async function addProxy(cfg) {
     const res = await pushApi(cfg); // APIにプロキシ設定を追加
-    console.log(res.data.result);
+    console.log(res.data);
     // APIレスポンスがsuccess以外の場合はエラーを返す
     if (!(res.data.result == "success")) throw res.data.err;
     console.log("プロキシ設定を追加しました")

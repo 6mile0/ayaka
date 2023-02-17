@@ -34,8 +34,31 @@ export default {
                 "intervalID": 0 // タイマーID
             };
 
-            // コンテナ作成
-            Promise.all([makeUserFolder(containerInfo), startUpAyaka(containerInfo, interaction), addProxy(containerInfo), addRecord(containerInfo)]).then(async (res) => {
+            // 結果を格納する配列
+            let result = [];
+
+            // コンテナ作成処理
+            makeUserFolder(containerInfo).then((res1) => {
+                if (res1 != 0) throw new Error('フォルダ作成に失敗しました。');
+                console.log(res1);
+                result.push(res1);
+                return startUpAyaka(containerInfo, interaction);
+            }).then((res2) => {
+                if (res2 != 0) throw new Error('コンテナ起動に失敗しました。');
+                console.log(res2);
+                result.push(res2);
+                return addProxy(containerInfo);
+            }).then((res3) => {
+                if (res3 != 0) throw new Error('プロキシ設定に失敗しました。');
+                console.log(res3);
+                result.push(res3);
+                return addRecord(containerInfo);
+            }).then((res4) => {
+                if (res4 != 0) throw new Error('レコード追加に失敗しました。');
+                console.log(res4);
+                result.push(res4);
+                return result;
+            }).then(async (res) => {
                 console.log(res);
                 if (!(res[0] == 0 && res[1] == 0 && res[2] == 0 && res[3] == 0)) throw ['引数が合いません。作成処理に失敗した可能性があります。'];
 
@@ -92,13 +115,12 @@ export default {
                 await interaction.user.send({
                     embeds: [message], components: [controlBtn]
                 });
-
-
             }).catch(async (e) => {
-                // コンテナ作成に失敗
+                // コンテナ作成失敗
                 if (e.length == 3) errorMsg(interaction, e[0], e[1], e[2]);
                 else await errorMsg(interaction, e);
             });
+
         } catch (e) {
             // ポートの割り当てに失敗
             console.log(e);

@@ -84,9 +84,23 @@ client.on('interactionCreate', async interaction => {
             await getCtnId(userId).then((ctnInfo) => { // コンテナID・コンテナ名を取得
                 console.log(ctnInfo[0]); // コンテナIDを表示
 
-                Promise.all([killAyaka(ctnInfo[0]), delRecord(ctnInfo[0])]).then(async (res) => {
-                    console.log(res[0]);
-                    if (!(res[0] == ctnInfo[0])) throw new Error('削除対象のコンテナIDが一致しません。削除処理に失敗した可能性があります。');
+                // 結果を格納する配列
+                let result = [];
+
+                // 直列処理
+                killAyaka(ctnInfo[0]).then((res1) => {
+                    if (res1[0] == ctnInfo[0]) throw new Error('コンテナの停止に失敗したか、プロキシ連携解除に失敗しました。');
+                    console.log(res1);
+                    result.push(res1);
+                    return delRecord(ctnInfo[0]); // データベースから削除
+                }).then((res2) => {
+                    if (res2[0] == ctnInfo[0]) throw new Error('レコードの削除に失敗しました。');
+                    console.log(res2);
+                    result.push(res2);
+                    return result
+                }).then(async (allRes) => {
+                    console.log(allRes);
+                    if (!(allRes[0][0] == allRes[1][0])) throw new Error('削除対象のコンテナIDが一致しません。削除処理に失敗した可能性があります。');
 
                     const message = new EmbedBuilder()
                         .setColor(0X32CD32)
@@ -98,13 +112,13 @@ client.on('interactionCreate', async interaction => {
                         )
                         .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
                     await interaction.reply({ embeds: [message] });
-
                 }).catch(async (e) => {
                     console.log(e);
                     // コンテナ削除に失敗した場合
                     if (e.length == 3) await errorMsg(interaction, e[0], e[1], e[2]);
                     else errorMsg(interaction, e);
                 });
+
             }).catch(async (e) => {
                 // コンテナIDが取得できなかった場合
                 if (e.length == 3) await errorMsg(interaction, e[0], e[1], e[2]);
