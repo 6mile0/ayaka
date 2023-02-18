@@ -1,10 +1,24 @@
 import dotenv from 'dotenv';
 const globalCfg = dotenv.config().parsed; // 設定ファイル読み込み
 import { asighnPorts, makeUserFolder, startUpAyaka, addProxy, addRecord } from "../functions/containerCreate.js";
-import { errorMsg, successMsg } from "../functions/common.js"; // 共通関数フレームの読み込み
 import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { nanoid, customAlphabet } from 'nanoid';
 const random = customAlphabet('1234567890abcdef', 16);
+
+async function errorMsg(
+    interaction, e = "NULL", code = "E9999", msg = "想定外のエラーが発生しました。操作をやめ，開発者に連絡してください。") {
+    console.log(e, code, msg);
+    const message = new EmbedBuilder()
+        .setColor(0xFF0000)
+        .setTitle('エラーが発生しました')
+        .setDescription(msg)
+        .addFields(
+            { name: "エラーコード", value: code },
+            { name: 'エラー内容', value: "```" + e + "```" },
+        )
+        .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
+    await interaction.reply({ embeds: [message] });
+}
 
 export default {
     data: new SlashCommandBuilder()
@@ -63,14 +77,19 @@ export default {
                 if (!(res[0] == 0 && res[1] == 0 && res[2] == 0 && res[3] == 0)) throw ['引数が合いません。作成処理に失敗した可能性があります。'];
 
                 // コンテナ作成通知
-                await successMsg(interaction, 'コンテナの作成に成功しました', 'DMにコンテナへの接続情報を送信しました．\n只今より3時間で自動停止します．(DMのボタンより随時延長が可能です)');
+                const successMessage = new EmbedBuilder()
+                    .setColor(0X32CD32)
+                    .setTitle("コンテナの作成に成功しました！")
+                    .setDescription("DMにコンテナへの接続情報を送信しました．\n只今より3時間で自動停止します．(DMのボタンより随時延長が可能です)")
+                    .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
+                await interaction.reply({ embeds: [successMessage] });
 
                 const message = new EmbedBuilder()
                     .setColor(0x32cd32)
                     .setTitle('コンテナが準備できたよ！')
                     .setDescription("開発環境の生成が完了しました。以下の情報を確認してください。")
                     .addFields(
-                        { name: 'アクセスURL', value: `${containerInfo.serviceDomain}/attach/${containerInfo.ctnId}/login` },
+                        { name: 'アクセスURL', value: `https://${containerInfo.ctnId}.ayaka.cybroad.dev/login` },
                         { name: 'コンテナ名', value: containerInfo.containerName },
                         { name: 'エディタログインパスワード', value: "`" + containerInfo.pass + "`" },
                         { name: 'sudoパスワード', value: "`" + containerInfo.sudoPass + "`" },
@@ -116,7 +135,7 @@ export default {
                     embeds: [message], components: [controlBtn]
                 });
             }).catch(async (e) => {
-                
+
                 // コンテナ作成失敗
                 if (e.length == 3) errorMsg(interaction, e[0], e[1], e[2]);
                 else await errorMsg(interaction, e);
