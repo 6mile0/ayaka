@@ -170,7 +170,7 @@ export async function addProxy(cfg) {
     const res = await pushApi(cfg); // APIにプロキシ設定を追加
     console.log(res.data);
     // APIレスポンスがsuccess以外の場合はエラーを返す
-    if (!(res.data.result == "success")) throw res.data.err;
+    if (!(res.data.status == "success")) throw res.data.message;
     console.log("プロキシ設定を追加しました")
     return 0;
 }
