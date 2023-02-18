@@ -117,7 +117,7 @@ export async function startUpAyaka(cfg, interaction) {
 
                     setTimeout(() => { // 3時間後にコンテナを削除
                         // 直列処理
-                        killAyaka(cfg.ctnId, cfg.containerName).then((res1) => {
+                        killAyaka(cfg.ctnId).then((res1) => {
                             if (res1[0] == cfg.ctnId) throw new Error('コンテナの停止に失敗したか、プロキシ連携解除に失敗しました。');
                             console.log(res1);
                             result.push(res1);
@@ -178,10 +178,10 @@ export async function addProxy(cfg) {
 async function pushApi(cfg) {
     return await axios
         .post(`${globalCfg.APIPOINT}/addproxy/`, {
-            "domain_name": cfg.containerName,
+            "name": cfg.ctnId,
             "port": cfg.port,
             "target_ip": globalCfg.SERVERIP,
-            " service_name": "ayaka",
+            "service_name": "ayaka"
         })
         .then((res) => {
             return res

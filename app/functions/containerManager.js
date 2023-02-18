@@ -46,7 +46,7 @@ export async function extendTime(ctnId, interaction) {
 
                 setTimeout(() => { // 3時間後にコンテナを削除
                     // 直列処理
-                    killAyaka(ctnId, ctnName).then((res1) => {
+                    killAyaka(ctnId).then((res1) => {
                         if (res1[0] == ctnId) throw new Error('コンテナの停止に失敗したか、プロキシ連携解除に失敗しました。');
                         console.log(res1);
                         result.push(res1);

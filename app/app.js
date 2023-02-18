@@ -89,7 +89,7 @@ client.on('interactionCreate', async interaction => {
                 let result = [];
 
                 // 直列処理
-                killAyaka(ctnInfo[0], ctnInfo[1]).then((res1) => {
+                killAyaka(ctnInfo[0]).then((res1) => {
                     if (res1[0] == ctnInfo[0]) throw new Error('コンテナの停止に失敗したか、プロキシ連携解除に失敗しました。');
                     console.log(res1);
                     result.push(res1);
