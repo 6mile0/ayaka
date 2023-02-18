@@ -59,7 +59,7 @@ export async function killAyaka(ctnId) {
             const resApi = await pushApi(ctnId); // APIにプロキシ設定を削除するリクエストを送信
             console.log(resApi.data.result);
             // APIレスポンスがsuccess以外の場合はエラーを返す
-            if (!(resApi.data.result == "success")) throw resApi.data.err;
+            if (!(resApi.data.status == "success")) throw resApi.data.message;
             console.log("プロキシ設定を削除しました")
             resolve(ctnId);
         } catch (e) {

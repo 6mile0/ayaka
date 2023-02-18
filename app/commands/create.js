@@ -116,6 +116,7 @@ export default {
                     embeds: [message], components: [controlBtn]
                 });
             }).catch(async (e) => {
+                
                 // コンテナ作成失敗
                 if (e.length == 3) errorMsg(interaction, e[0], e[1], e[2]);
                 else await errorMsg(interaction, e);
