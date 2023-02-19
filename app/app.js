@@ -5,7 +5,7 @@ import { getCtnId, delRecord } from './functions/containerDelete.js';
 import { extendTime, delUserDir } from './functions/containerManager.js';
 import { killAyaka } from './functions/containerDelete.js';
 import { getDbData } from "./functions/getContainerData.js";
-import { errorMsg } from './functions/common.js';
+import { replyErrorMsg } from './functions/common.js';
 import fs from 'node:fs';
 import path from 'path';
 import express from 'express';
@@ -116,14 +116,24 @@ client.on('interactionCreate', async interaction => {
                 }).catch(async (e) => {
                     console.log(e);
                     // コンテナ削除に失敗した場合
-                    if (e.length == 3) await errorMsg(interaction, e[0], e[1], e[2]);
-                    else errorMsg(interaction, e);
+                    if (e == void 0) { // eがundefinedの場合
+                        await replyErrorMsg(interaction, e)
+                    } else { // eがundefinedでない場合
+                        console.log(e);
+                        if (e.length == 3) replyErrorMsg(interaction, e[0], e[1], e[2]);
+                        else await replyErrorMsg(interaction, e);
+                    }
                 });
 
             }).catch(async (e) => {
                 // コンテナIDが取得できなかった場合
-                if (e.length == 3) await errorMsg(interaction, e[0], e[1], e[2]);
-                else await errorMsg(interaction, e);
+                if (e == void 0) { // eがundefinedの場合
+                    await replyErrorMsg(interaction, e)
+                } else { // eがundefinedでない場合
+                    console.log(e);
+                    if (e.length == 3) replyErrorMsg(interaction, e[0], e[1], e[2]);
+                    else await replyErrorMsg(interaction, e);
+                }
             });
 
             // ==================================================
@@ -150,13 +160,23 @@ client.on('interactionCreate', async interaction => {
                     await interaction.reply({ embeds: [timerEmbed] });
                 }).catch(async (e) => {
                     // コンテナ削除日時の延長に失敗した場合
-                    if (e.length == 3) await errorMsg(interaction, e[0], e[1], e[2]);
-                    else await errorMsg(interaction, e);
+                    if (e == void 0) { // eがundefinedの場合
+                        await replyErrorMsg(interaction, e)
+                    } else { // eがundefinedでない場合
+                        console.log(e);
+                        if (e.length == 3) replyErrorMsg(interaction, e[0], e[1], e[2]);
+                        else await replyErrorMsg(interaction, e);
+                    }
                 });
             }).catch(async (e) => {
                 // コンテナIDが取得できなかった場合
-                if (e.length == 3) await errorMsg(interaction, e[0], e[1], e[2]);
-                else await errorMsg(interaction, e);
+                if (e == void 0) { // eがundefinedの場合
+                    await replyErrorMsg(interaction, e)
+                } else { // eがundefinedでない場合
+                    console.log(e);
+                    if (e.length == 3) replyErrorMsg(interaction, e[0], e[1], e[2]);
+                    else await replyErrorMsg(interaction, e);
+                }
             });
             // ==================================================
             // リセットボタンが押されたとき
@@ -176,8 +196,13 @@ client.on('interactionCreate', async interaction => {
                 await interaction.reply({ embeds: [timerEmbed] });
             }).catch(async (e) => {
                 // ユーザーディレクトリの削除に失敗した場合
-                if (e.length == 3) await errorMsg(interaction, e[0], e[1], e[2]);
-                else await errorMsg(interaction, e);
+                if (e == void 0) { // eがundefinedの場合
+                    await replyErrorMsg(interaction, e)
+                } else { // eがundefinedでない場合
+                    console.log(e);
+                    if (e.length == 3) replyErrorMsg(interaction, e[0], e[1], e[2]);
+                    else await replyErrorMsg(interaction, e);
+                }
             });
         } else if (interaction.customId === "link") {
             await interaction.reply({

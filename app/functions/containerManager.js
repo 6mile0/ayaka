@@ -72,8 +72,13 @@ export async function extendTime(ctnId, interaction) {
                     }).catch(async (e) => {
                         console.log(e);
                         // コンテナ削除に失敗した場合
-                        if (e.length == 3) await errorMsg(interaction, e[0], e[1], e[2]);
-                        else errorMsg(interaction, e);
+                        if (e == void 0) { // eがundefinedの場合
+                            await errorMsg(interaction, e)
+                        } else { // eがundefinedでない場合
+                            console.log(e);
+                            if (e.length == 3) errorMsg(interaction, e[0], e[1], e[2]);
+                            else await errorMsg(interaction, e);
+                        }
                     });
                     clearInterval(intervalID);
                 });

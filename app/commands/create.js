@@ -2,23 +2,9 @@ import dotenv from 'dotenv';
 const globalCfg = dotenv.config().parsed; // 設定ファイル読み込み
 import { asighnPorts, makeUserFolder, startUpAyaka, addProxy, addRecord } from "../functions/containerCreate.js";
 import { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { replyErrorMsg } from "../functions/common.js"; // エラーメッセージを返す関数(インタラクションリプライあり)
 import { nanoid, customAlphabet } from 'nanoid';
 const random = customAlphabet('1234567890abcdef', 16);
-
-async function errorMsg(
-    interaction, e = "NULL", code = "E9999", msg = "想定外のエラーが発生しました。操作をやめ，開発者に連絡してください。") {
-    console.log(e, code, msg);
-    const message = new EmbedBuilder()
-        .setColor(0xFF0000)
-        .setTitle('エラーが発生しました')
-        .setDescription(msg)
-        .addFields(
-            { name: "エラーコード", value: code },
-            { name: 'エラー内容', value: "```" + e + "```" },
-        )
-        .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
-    await interaction.reply({ embeds: [message] });
-}
 
 export default {
     data: new SlashCommandBuilder()
@@ -34,7 +20,6 @@ export default {
             if (!(ports[0] == 0) && (ports[1] == "C0002")) throw [ports[2], 'C0002', 'コンテナの作成に失敗しました．詳細はエラーログをご確認ください。'];
 
             const containerInfo = {
-                "serviceDomain": globalCfg.SERVICEDOMAIN, // サービスドメイン
                 "ctnId": random(12), // コンテナID
                 "userId": interaction.user.id, // ユーザーID
                 "containerName": "ayaka-" + random(8), // コンテナ名
@@ -84,12 +69,13 @@ export default {
                     .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
                 await interaction.reply({ embeds: [successMessage] });
 
+                // コンテナ情報をDMで送信
                 const message = new EmbedBuilder()
                     .setColor(0x32cd32)
                     .setTitle('コンテナが準備できたよ！')
                     .setDescription("開発環境の生成が完了しました。以下の情報を確認してください。")
                     .addFields(
-                        { name: 'アクセスURL', value: `https://${containerInfo.ctnId}.ayaka.cybroad.dev/login` },
+                        { name: 'アクセスURL', value: `https://${containerInfo.ctnId}.${globalCfg.DOMAIN}/login` },
                         { name: 'コンテナ名', value: containerInfo.containerName },
                         { name: 'エディタログインパスワード', value: "`" + containerInfo.pass + "`" },
                         { name: 'sudoパスワード', value: "`" + containerInfo.sudoPass + "`" },
@@ -99,6 +85,7 @@ export default {
                     )
                     .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
 
+                // コンテナ操作ボタン
                 const controlBtn = new ActionRowBuilder()
                     .addComponents(
                         new ButtonBuilder()
@@ -128,24 +115,32 @@ export default {
                     .addComponents(
                         new ButtonBuilder()
                             .setLabel("コンテナ一覧")
-                            .setURL("https://ayaka.cybroad.dev/lists")
+                            .setURL(`https://${globalCfg.DOMAIN}/lists`)
                             .setStyle(ButtonStyle.Link)
                     )
                 await interaction.user.send({
                     embeds: [message], components: [controlBtn]
                 });
             }).catch(async (e) => {
-
                 // コンテナ作成失敗
-                if (e.length == 3) errorMsg(interaction, e[0], e[1], e[2]);
-                else await errorMsg(interaction, e);
+                if (e == void 0) { // eがundefinedの場合
+                    await replyErrorMsg(interaction, e)
+                } else { // eがundefinedでない場合
+                    console.log(e);
+                    if (e.length == 3) replyErrorMsg(interaction, e[0], e[1], e[2]);
+                    else await replyErrorMsg(interaction, e);
+                }
             });
 
         } catch (e) {
             // ポートの割り当てに失敗
-            console.log(e);
-            if (e.length == 3) errorMsg(interaction, e[0], e[1], e[2]);
-            else await errorMsg(interaction, e);
+            if (e == void 0) { // eがundefinedの場合
+                await replyErrorMsg(interaction, e)
+            } else { // eがundefinedでない場合
+                console.log(e);
+                if (e.length == 3) replyErrorMsg(interaction, e[0], e[1], e[2]);
+                else await replyErrorMsg(interaction, e);
+            }
         }
     },
 };
