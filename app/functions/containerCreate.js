@@ -88,7 +88,7 @@ export async function makeUserFolder(cfg) {
 export async function startUpAyaka(cfg, interaction) {
     return new Promise((resolve, reject) => {
         cfg.nowIimeMs = new Date().getTime(); // 現在時刻(ミリ秒)
-        cfg.expiredMs = cfg.nowIimeMs + 10800000;// 3時間後(自動削除予定時刻)
+        cfg.expiredMs = cfg.nowIimeMs + 10800000;// 3時間後(自動削除予定時刻) 10800000
         cfg.createdTime = new Date(cfg.nowIimeMs); // 生成時間
         cfg.expiredTime = new Date(cfg.expiredMs); // 3時間後(自動削除予定時刻)
         console.log(cfg);
@@ -102,6 +102,7 @@ export async function startUpAyaka(cfg, interaction) {
             var intervalID = setInterval(() => {
                 var dt = new Date(); // 現在時刻
                 if (dt.getTime() >= cfg.expiredMs) { // 3時間後ミリ秒一致時
+		let result = [];
 
                     interaction.channel.send(`<@${cfg.userId}>`);
                     const timerEmbed = new EmbedBuilder()
@@ -136,7 +137,8 @@ export async function startUpAyaka(cfg, interaction) {
                                 .setTitle('コンテナの削除に成功しました')
                                 .setDescription("下記のコンテナを削除しました。")
                                 .addFields(
-                                    { name: 'コンテナ名', value: res[0] },
+                                    { name: 'コンテナ名', value: cfg.containerName },
+				    { name: 'コンテナID', value: cfg.ctnId },
                                 )
                                 .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
                             await interaction.user.send({ ephemeral: true, embeds: [message] });
