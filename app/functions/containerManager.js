@@ -44,6 +44,8 @@ export async function extendTime(ctnId, interaction) {
                     .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
                 interaction.channel.send({ embeds: [timerEmbed] });
 
+		let result = [];
+
                 setTimeout(() => { // 3時間後にコンテナを削除
                     // 直列処理
                     killAyaka(ctnId).then((res1) => {
@@ -65,7 +67,7 @@ export async function extendTime(ctnId, interaction) {
                             .setTitle('コンテナの削除に成功しました')
                             .setDescription("下記のコンテナを削除しました。")
                             .addFields(
-                                { name: 'コンテナ名', value: res[0] },
+                                { name: 'コンテナ名', value: ctnName },
                             )
                             .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
                         await interaction.user.send({ ephemeral: true, embeds: [message] });
