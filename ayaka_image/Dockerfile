@@ -7,7 +7,8 @@ RUN apt-get install python3 python3-pip -y
 RUN apt-get install build-essential -y
 # NodeJS
 RUN curl -sL https://deb.nodesource.com/setup_19.x | bash - && \
-    apt-get install -y nodejs
+    apt-get install -y nodejs && \
+    npm install -g yarn
 # Java
 RUN apt-get install default-jdk -y
 # Go
