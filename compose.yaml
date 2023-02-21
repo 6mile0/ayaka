@@ -2,7 +2,7 @@ version: "3.9"
 services:
   bot:
     build: ./dockerfiles/bot
-    restart: on-failure
+    restart: always
     volumes:
       - ./app:/app
       - /var/run/docker.sock:/var/run/docker.sock

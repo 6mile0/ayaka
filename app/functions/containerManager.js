@@ -25,6 +25,8 @@ export async function extendTime(ctnId, interaction) {
         if (res.length == 0) throw ['あなたの作成したコンテナは一つも存在しないか見つかりませんでした。', 'M0001', 'コンテナがありません。作成をお試しください。'];
 
         clearInterval(res[0]["interval_id"]); // 既存のタイマーを解除
+
+        let created_at = new Date(res[0]["created_at"]); // 生成時間
         let expiredMs = res[0]["expired_at"] + 10800000;// 3時間後(自動削除予定時刻)
         let ctnName = res[0]["container_name"];
 
@@ -39,12 +41,12 @@ export async function extendTime(ctnId, interaction) {
                     .setDescription("3時間経過し、延長申請がなかったためコンテナを削除しました。")
                     .addFields(
                         { name: 'コンテナ名', value: ctnName },
-                        { name: '作成日時', value: res[0]["created_at"].toLocaleString('ja-JP') },
+                        { name: '作成日時', value: created_at.toLocaleString('ja-JP') },
                     )
                     .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
                 interaction.channel.send({ embeds: [timerEmbed] });
 
-		let result = [];
+                let result = [];
 
                 setTimeout(() => { // 3時間後にコンテナを削除
                     // 直列処理

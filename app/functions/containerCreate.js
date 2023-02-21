@@ -102,7 +102,7 @@ export async function startUpAyaka(cfg, interaction) {
             var intervalID = setInterval(() => {
                 var dt = new Date(); // 現在時刻
                 if (dt.getTime() >= cfg.expiredMs) { // 3時間後ミリ秒一致時
-		let result = [];
+                    let result = [];
 
                     interaction.channel.send(`<@${cfg.userId}>`);
                     const timerEmbed = new EmbedBuilder()
@@ -138,7 +138,7 @@ export async function startUpAyaka(cfg, interaction) {
                                 .setDescription("下記のコンテナを削除しました。")
                                 .addFields(
                                     { name: 'コンテナ名', value: cfg.containerName },
-				    { name: 'コンテナID', value: cfg.ctnId },
+                                    { name: 'コンテナID', value: cfg.ctnId },
                                 )
                                 .setFooter({ text: `ayaka Ver ${globalCfg.VER} `, iconURL: globalCfg.ICON });
                             await interaction.user.send({ ephemeral: true, embeds: [message] });
